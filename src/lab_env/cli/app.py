@@ -67,13 +67,13 @@ def main(
 # --------------------------------------------------
 
 # init command
-app.command(name="init", rich_help_panel="Environment")(cmd_init)
+app.command(name="init", rich_help_panel="Configuration")(cmd_init)
 
 # hosts command
-app.command(name="hosts", rich_help_panel="Environment")(cmd_hosts)
+app.command(name="hosts", rich_help_panel="Configuration")(cmd_hosts)
 
 # doctor command
-app.command(name="doctor", rich_help_panel="Environment")(cmd_doctor)
+app.command(name="doctor", rich_help_panel="Diagnostics")(cmd_doctor)
 
 # remote commands
 app.command(name="connect", rich_help_panel="Remote")(cmd_connect)

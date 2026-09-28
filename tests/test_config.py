@@ -2,11 +2,34 @@
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 import pytest
 
-from lab_env.config import ConfigError, load_config
+from lab_env.config import ConfigError, initialize_config, load_config
+
+
+def test_initialized_config_includes_copy_ready_examples(tmp_path: Path) -> None:
+    config_path = tmp_path / "config.toml"
+
+    initialize_config(config_path)
+
+    config_text = config_path.read_text(encoding="utf-8")
+    config = load_config(config_path)
+    assert config.shell.default_aliases is True
+    assert "# lab-env user configuration" in config_text
+    assert re.search(r"# created at: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z", config_text)
+    assert "# persistent user-owned file; make and keep your changes here" in config_text
+    assert "# lab init will never overwrite this file" in config_text
+    assert "# basic settings: config format used by lab-env" in config_text
+    assert "# shell configuration: controls generated shell integration" in config_text
+    assert "# user-defined aliases: persistent commands and default overrides" in config_text
+    assert "# remote hosts: named systems used by connect, pull, and push" in config_text
+    assert '# gs = "git status"' in config_text
+    assert "# work = 'cd \"$HOME/work\"'" in config_text
+    assert '# Skip selected defaults, for example: ["rm", "cp"].' in config_text
+    assert "# [hosts.cluster]" in config_text
 
 
 def test_host_uses_configured_ssh_command(tmp_path: Path) -> None:

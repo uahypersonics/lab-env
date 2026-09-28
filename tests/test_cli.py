@@ -24,7 +24,8 @@ def test_help_and_version() -> None:
     assert "pull" in help_result.output
     assert "push" in help_result.output
     assert "shell" in help_result.output
-    assert "Environment" in help_result.output
+    assert "Configuration" in help_result.output
+    assert "Diagnostics" in help_result.output
     assert "Remote" in help_result.output
     assert "Shell" in help_result.output
     assert version_result.exit_code == 0

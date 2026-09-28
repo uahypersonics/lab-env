@@ -20,6 +20,10 @@ Host `destination` values should normally name entries in `~/.ssh/config`.
 Authentication, host keys, and usernames remain under SSH configuration rather
 than being duplicated in `lab-env`.
 
+The `[hosts]` table is the namespace for named remote systems used by `connect`,
+`pull`, and `push`. Each `[hosts.NAME]` child table defines one destination that
+can be referenced by `NAME` on the command line.
+
 When a host requires a different SSH-compatible executable, configure its path
 explicitly. `connect`, `pull`, and `push` all use the same executable:
 

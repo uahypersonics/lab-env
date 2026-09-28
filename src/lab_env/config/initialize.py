@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from datetime import UTC, datetime
 from pathlib import Path
 
 from lab_env.config.classes import SCHEMA_VERSION
@@ -37,20 +38,44 @@ def initialize_config(path: Path) -> Path:
 
     resolved_path = path.expanduser()
     resolved_path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+    created_at = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
     config_text = (
-        "# lab-env personal configuration\n"
+        "# --------------------------------------------------\n"
+        "# lab-env user configuration\n"
+        f"# created at: {created_at}\n"
+        "# persistent user-owned file; make and keep your changes here\n"
+        "# lab init will never overwrite this file\n"
+        "# --------------------------------------------------\n\n"
+        "# --------------------------------------------------\n"
+        "# basic settings: config format used by lab-env\n"
+        "# --------------------------------------------------\n"
+        "# Do not change this value manually.\n"
         f"schema_version = {SCHEMA_VERSION}\n\n"
-        "# Generate the standard lab-env aliases.\n"
+        "# --------------------------------------------------\n"
+        "# shell configuration: controls generated shell integration\n"
+        "# --------------------------------------------------\n"
         "[shell]\n"
-        "default_aliases = true\n\n"
-        "# Disable individual defaults by name.\n"
+        "# Generate the standard aliases defined by lab-env.\n"
+        "default_aliases = true\n"
+        '# Skip selected defaults, for example: ["rm", "cp"].\n'
         "disabled_aliases = []\n\n"
-        "# Add or override aliases here. Quoted keys support names such as '..'.\n"
+        "# --------------------------------------------------\n"
+        "# user-defined aliases: persistent commands and default overrides\n"
+        "# --------------------------------------------------\n"
         "[shell.aliases]\n"
-        '# gs = "git status"\n\n'
-        "# Add named SSH destinations under [hosts].\n"
-        "# Authentication remains in ~/.ssh/config.\n"
-        "[hosts]\n"
+        '# gs = "git status"\n'
+        "# work = 'cd \"$HOME/work\"'\n"
+        '# ll = "eza --long --header"\n\n'
+        "# --------------------------------------------------\n"
+        "# remote hosts: named systems used by connect, pull, and push\n"
+        "# --------------------------------------------------\n"
+        "# Define each as [hosts.NAME]; authentication remains in ~/.ssh/config.\n"
+        "[hosts]\n\n"
+        "# Example named host and its available fields:\n"
+        "# [hosts.cluster]\n"
+        '# destination = "user@cluster.example.edu"\n'
+        '# description = "Research cluster"\n'
+        '# ssh_command = "ssh"\n'
     )
 
     with resolved_path.open("x", encoding="utf-8") as stream:
