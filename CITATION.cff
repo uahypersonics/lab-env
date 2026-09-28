@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "lab-env"
+abstract: "Tools for consistent research computing environments"
+type: software
+authors:
+  - family-names: "Hader"
+    given-names: "Christoph"
+    affiliation: "University of Arizona"
+repository-code: "https://github.com/uahypersonics/lab-env"
+url: "https://uahypersonics.github.io/lab-env"
+license: GPL-3.0-or-later
+keywords:
+  - research computing
+  - high-performance computing
+  - environment configuration
+  - command-line interface

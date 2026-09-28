@@ -1,0 +1,116 @@
+"""Command-line behavior tests."""
+
+from __future__ import annotations
+
+from pathlib import Path
+from unittest.mock import patch
+
+from typer.testing import CliRunner
+
+from lab_env.cli import app
+
+runner = CliRunner()
+
+
+def test_help_and_version() -> None:
+    help_result = runner.invoke(app, ["--help"])
+    version_result = runner.invoke(app, ["--version"])
+
+    assert help_result.exit_code == 0
+    assert "init" in help_result.output
+    assert "hosts" in help_result.output
+    assert "doctor" in help_result.output
+    assert version_result.exit_code == 0
+    assert version_result.output.startswith("lab ")
+
+
+def test_init_creates_config_without_overwriting(tmp_path: Path) -> None:
+    config_path = tmp_path / "personal" / "config.toml"
+
+    first_result = runner.invoke(app, ["--config", str(config_path), "init"])
+    original_text = config_path.read_text(encoding="utf-8")
+    second_result = runner.invoke(app, ["--config", str(config_path), "init"])
+
+    assert first_result.exit_code == 0
+    assert "no shell startup files were modified" in first_result.output
+    assert "schema_version = 1" in original_text
+    assert second_result.exit_code == 1
+    assert config_path.read_text(encoding="utf-8") == original_text
+
+
+def test_hosts_lists_valid_configuration(tmp_path: Path) -> None:
+    config_path = tmp_path / "config.toml"
+    config_path.write_text(
+        "schema_version = 1\n\n"
+        "[hosts.example]\n"
+        'destination = "example-alias"\n'
+        'description = "Fictitious development host"\n',
+        encoding="utf-8",
+    )
+
+    result = runner.invoke(app, ["--config", str(config_path), "hosts"])
+
+    assert result.exit_code == 0
+    assert "example: example-alias - Fictitious development host" in result.output
+
+
+def test_hosts_reports_missing_configuration(tmp_path: Path) -> None:
+    config_path = tmp_path / "missing.toml"
+
+    result = runner.invoke(app, ["--config", str(config_path), "hosts"])
+
+    assert result.exit_code == 2
+    assert "configuration not found" in result.output
+
+
+def test_doctor_checks_local_environment_without_network(tmp_path: Path) -> None:
+    config_path = tmp_path / "config.toml"
+    config_path.write_text("schema_version = 1\n[hosts]\n", encoding="utf-8")
+
+    with (
+        patch.dict("os.environ", {"SHELL": "/bin/zsh"}),
+        patch("lab_env.diagnostics.shutil.which", side_effect=lambda name: f"/fake/{name}"),
+    ):
+        result = runner.invoke(app, ["--config", str(config_path), "doctor"])
+
+    assert result.exit_code == 0
+    assert "[ok] config:" in result.output
+    assert "[ok] shell: zsh" in result.output
+    assert "[ok] ssh: /fake/ssh" in result.output
+
+
+def test_doctor_fails_for_missing_configuration(tmp_path: Path) -> None:
+    config_path = tmp_path / "missing.toml"
+
+    result = runner.invoke(app, ["--config", str(config_path), "doctor"])
+
+    assert result.exit_code == 1
+    assert "[error] config: configuration not found" in result.output
+
+
+def test_shell_cli_preview_install_status_and_uninstall(tmp_path: Path) -> None:
+    config_path = tmp_path / "config" / "config.toml"
+    config_path.parent.mkdir()
+    config_path.write_text("schema_version = 1\n[hosts]\n", encoding="utf-8")
+    rc_path = tmp_path / "home" / ".zshrc"
+    rc_path.parent.mkdir()
+    rc_path.write_text("export EXISTING=value\n", encoding="utf-8")
+    common_args = [
+        "--config",
+        str(config_path),
+        "shell",
+    ]
+    shell_args = ["--shell", "zsh", "--rc", str(rc_path)]
+
+    preview_result = runner.invoke(app, [*common_args, "preview", *shell_args])
+    install_result = runner.invoke(app, [*common_args, "install", *shell_args])
+    status_result = runner.invoke(app, [*common_args, "status", *shell_args])
+    uninstall_result = runner.invoke(app, [*common_args, "uninstall", *shell_args])
+
+    assert preview_result.exit_code == 0
+    assert "managed startup block" in preview_result.output
+    assert install_result.exit_code == 0
+    assert "backup:" in install_result.output
+    assert "zsh: installed" in status_result.output
+    assert uninstall_result.exit_code == 0
+    assert rc_path.read_text(encoding="utf-8") == "export EXISTING=value\n"
