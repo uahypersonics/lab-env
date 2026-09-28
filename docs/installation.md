@@ -8,18 +8,17 @@
 
 ## From PyPI
 
-!!! note "Not published yet"
-	The project is PyPI-ready, but the first public release has not been
-	published. Use the source installation below during development.
+!!! note "First release"
+	Tagged releases are published automatically. Until the first successful
+	publication appears on PyPI, use the source installation below.
 
-After the first release, the standard installation will be:
+Install a published release with:
 
 ```bash
 pip install lab-env
 ```
 
-For an isolated application install, `pipx install lab-env` will also be
-supported.
+For an isolated application install, use `pipx install lab-env`.
 
 ## From Source
 

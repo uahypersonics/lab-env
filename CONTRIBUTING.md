@@ -45,8 +45,11 @@ Documentation changes should clearly distinguish implemented features from
 planned behavior.
 
 Package artifacts are built and checked by GitHub Actions. Publishing is
-performed only through an explicitly authorized release workflow. Do not add
-PyPI credentials or a personal `.pypirc` to the repository.
+performed only through the release workflow: pushing a `vX.Y.Z` tag runs the
+test suite, builds and checks both distributions, publishes them through PyPI
+Trusted Publishing, and creates a GitHub Release. The package version is
+derived from the tag by `setuptools-scm`. Do not add PyPI credentials or a
+personal `.pypirc` to the repository.
 
 ## Pull Requests
 
