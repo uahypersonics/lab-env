@@ -6,6 +6,7 @@ import os
 import re
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 from unittest.mock import patch
 
@@ -70,7 +71,10 @@ def test_generated_shell_includes_default_aliases(tmp_path: Path) -> None:
     assert "alias l='ls -altr'" in generated_shell
     assert "alias la='ls -lah'" in generated_shell
     assert "alias ll='ls -lh'" in generated_shell
-    assert "alias ls='ls -C -G -h'" in generated_shell
+    if sys.platform == "darwin":
+        assert "alias ls='ls -C -G -h'" in generated_shell
+    else:
+        assert "alias ls='ls --color=auto -C -h'" in generated_shell
     assert "alias cp='cp -i'" in generated_shell
     assert "alias mv='mv -i'" in generated_shell
     assert "alias rm='rm -i'" in generated_shell
@@ -182,6 +186,19 @@ def test_generated_shell_supports_disabling_all_defaults(tmp_path: Path) -> None
     assert "alias ll=" not in generated_shell
     assert "alias rm=" not in generated_shell
     assert "alias gs='git status'" in generated_shell
+
+
+def test_default_ls_alias_uses_platform_color_flag(tmp_path: Path) -> None:
+    config_path = tmp_path / "config.toml"
+    config_path.write_text("schema_version = 1\n[hosts]\n", encoding="utf-8")
+
+    with patch("lab_env.shell.aliases.sys.platform", "linux"):
+        linux_shell = render_generated_shell(config_path)
+    with patch("lab_env.shell.aliases.sys.platform", "darwin"):
+        macos_shell = render_generated_shell(config_path)
+
+    assert "alias ls='ls --color=auto -C -h'" in linux_shell
+    assert "alias ls='ls -C -G -h'" in macos_shell
 
 
 def test_install_is_idempotent_and_preserves_existing_content(tmp_path: Path) -> None:

@@ -67,7 +67,7 @@ gs = "git status"
 project = 'cd "$HOME/work/current project"'
 ```
 
-Default aliases provide `..`, `b`, `l`, `la`, `ll`, a colorized macOS `ls`, and
+Default aliases provide `..`, `b`, `l`, `la`, `ll`, a platform-colorized `ls`, and
 interactive `cp`, `mv`, and `rm` commands.
 
 With `initialize_conda = true`, the generated shell file sources `conda.sh` from

@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 import shlex
+import sys
 
 from lab_env.config import ShellConfig
 
@@ -18,7 +19,6 @@ DEFAULT_ALIASES = {
     "l": "ls -altr",
     "la": "ls -lah",
     "ll": "ls -lh",
-    "ls": "ls -C -G -h",
     "cp": "cp -i",
     "mv": "mv -i",
     "rm": "rm -i",
@@ -35,6 +35,7 @@ def render_aliases(config: ShellConfig) -> str:
     aliases: dict[str, str] = {}
     if config.default_aliases:
         aliases.update(DEFAULT_ALIASES)
+        aliases["ls"] = _default_ls_alias()
     for alias_name in config.disabled_aliases:
         aliases.pop(alias_name, None)
     aliases.update(config.aliases)
@@ -51,3 +52,11 @@ def render_aliases(config: ShellConfig) -> str:
     for alias_name, command in sorted(aliases.items()):
         lines.append(f"alias {alias_name}={shlex.quote(command)}")
     return "\n".join(lines) + "\n"
+
+
+def _default_ls_alias() -> str:
+    """Return the colorized listing alias for the current operating system."""
+
+    if sys.platform == "darwin":
+        return "ls -C -G -h"
+    return "ls --color=auto -C -h"
