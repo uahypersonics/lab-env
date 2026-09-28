@@ -91,7 +91,6 @@ def cmd_pull(
     _execute(arguments, dry_run)
 
 
-
 def cmd_push(
     context: typer.Context,
     host_name: Annotated[str, typer.Argument(help="Configured host name.")],

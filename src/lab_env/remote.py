@@ -41,9 +41,7 @@ def resolve_host(config: LabConfig, host_name: str) -> HostConfig:
     host = config.hosts.get(host_name)
     if host is None:
         available = ", ".join(sorted(config.hosts)) or "none"
-        raise RemoteCommandError(
-            f"unknown host '{host_name}'; configured hosts: {available}"
-        )
+        raise RemoteCommandError(f"unknown host '{host_name}'; configured hosts: {available}")
     return host
 
 
@@ -116,9 +114,7 @@ def run_command(arguments: Sequence[str], *, dry_run: bool = False) -> CommandRe
     except FileNotFoundError as error:
         raise RemoteCommandError(f"command not found: {prepared_arguments[0]}") from error
     except OSError as error:
-        raise RemoteCommandError(
-            f"cannot start {prepared_arguments[0]}: {error}"
-        ) from error
+        raise RemoteCommandError(f"cannot start {prepared_arguments[0]}: {error}") from error
 
     return CommandResult(
         arguments=prepared_arguments,

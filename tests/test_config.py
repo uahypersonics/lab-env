@@ -27,9 +27,7 @@ def test_host_uses_configured_ssh_command(tmp_path: Path) -> None:
 def test_host_defaults_to_standard_ssh(tmp_path: Path) -> None:
     config_path = tmp_path / "config.toml"
     config_path.write_text(
-        "schema_version = 1\n\n"
-        "[hosts.cluster]\n"
-        'destination = "cluster-alias"\n',
+        'schema_version = 1\n\n[hosts.cluster]\ndestination = "cluster-alias"\n',
         encoding="utf-8",
     )
 

@@ -69,9 +69,7 @@ def test_remote_cli_dry_run_uses_configured_host(tmp_path: Path) -> None:
 def test_remote_cli_runs_without_a_shell_and_preserves_exit_code(tmp_path: Path) -> None:
     config_path = tmp_path / "config.toml"
     config_path.write_text(
-        "schema_version = 1\n\n"
-        "[hosts.cluster]\n"
-        'destination = "cluster-alias"\n',
+        'schema_version = 1\n\n[hosts.cluster]\ndestination = "cluster-alias"\n',
         encoding="utf-8",
     )
 

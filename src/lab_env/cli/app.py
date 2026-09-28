@@ -29,6 +29,7 @@ app = typer.Typer(
     add_completion=False,
 )
 
+
 # --------------------------------------------------
 # callbacks: defined in callbacks.py
 #   - version_callback: handles the --version option
@@ -59,6 +60,7 @@ def main(
 
     del version
     context.obj = CliContext(config_path=config or default_config_path())
+
 
 # --------------------------------------------------
 # register commands: provided in cmd_*.py modules
