@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 import re
+import shutil
 import subprocess
 from pathlib import Path
 from unittest.mock import patch
@@ -21,6 +22,15 @@ from lab_env.shell import (
     resolve_shell_paths,
     uninstall_shell,
 )
+
+
+def _test_shell_executable() -> str:
+    """Find an installed shell that can execute the generated portable script."""
+
+    shell_executable = shutil.which("zsh", path=os.defpath) or shutil.which("bash", path=os.defpath)
+    if shell_executable is None:
+        pytest.skip("runtime shell test requires zsh or bash")
+    return shell_executable
 
 
 def test_generated_shell_includes_default_aliases(tmp_path: Path) -> None:
@@ -78,7 +88,11 @@ def test_findbig_handles_paths_with_spaces(tmp_path: Path) -> None:
         stream.write(b"\0")
 
     result = subprocess.run(
-        ["/bin/zsh", "-c", f'source "{generated_path}"; cd "{tmp_path}"; findbig 1M'],
+        [
+            _test_shell_executable(),
+            "-c",
+            f'source "{generated_path}"; cd "{tmp_path}"; findbig 1M',
+        ],
         check=True,
         capture_output=True,
         env={**os.environ, "PATH": "/usr/bin:/bin:/usr/sbin:/sbin"},
@@ -99,7 +113,7 @@ def test_generated_shell_initializes_miniforge_from_home(tmp_path: Path) -> None
     conda_script.write_text('conda() { printf "conda available\\n"; }\n', encoding="utf-8")
 
     result = subprocess.run(
-        ["/bin/zsh", "-c", f'source "{generated_path}"; conda'],
+        [_test_shell_executable(), "-c", f'source "{generated_path}"; conda'],
         check=True,
         capture_output=True,
         env={**os.environ, "HOME": str(tmp_path), "PATH": "/usr/bin:/bin:/usr/sbin:/sbin"},
