@@ -7,7 +7,8 @@ import shutil
 from dataclasses import dataclass
 from pathlib import Path
 
-from lab_env.config import ConfigError, load_config
+from lab_env.config import ConfigError, LabConfig, load_config
+from lab_env.shell.environment import find_conda_init
 
 SUPPORTED_SHELLS = {"bash", "zsh"}
 CONNECTION_CLIENTS = ("ssh", "rsync", "scp", "sftp")
@@ -33,6 +34,7 @@ def run_diagnostics(config_path: Path) -> list[DiagnosticResult]:
     """
 
     results: list[DiagnosticResult] = []
+    config: LabConfig | None = None
 
     try:
         config = load_config(config_path)
@@ -52,6 +54,19 @@ def run_diagnostics(config_path: Path) -> list[DiagnosticResult]:
     else:
         detail = shell_name or "SHELL is not set"
         results.append(DiagnosticResult("shell", "warning", detail))
+
+    conda_init_path = config.shell.conda_init_path if config is not None else None
+    conda_init = find_conda_init(conda_init_path)
+    if config is not None and not config.shell.initialize_conda:
+        results.append(DiagnosticResult("conda", "ok", "initialization disabled in config"))
+    elif conda_init_path is not None and conda_init is None:
+        results.append(
+            DiagnosticResult("conda", "warning", f"configured path not found: {conda_init_path}")
+        )
+    elif conda_init is None:
+        results.append(DiagnosticResult("conda", "warning", "conda.sh not found"))
+    else:
+        results.append(DiagnosticResult("conda", "ok", str(conda_init)))
 
     for client_name in CONNECTION_CLIENTS:
         client_path = shutil.which(client_name)

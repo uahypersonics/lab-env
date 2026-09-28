@@ -11,6 +11,7 @@ from pathlib import Path
 
 from lab_env.config import load_config
 from lab_env.shell.aliases import render_aliases
+from lab_env.shell.environment import render_environment
 from lab_env.shell.functions import render_functions
 
 BLOCK_START = "# >>> lab-env >>>"
@@ -27,7 +28,8 @@ def render_generated_shell(config_path: Path) -> str:
         config_path: Personal configuration used to render shell content.
 
     Returns:
-        Generated shell source containing metadata, aliases, and functions.
+        Generated shell source containing metadata, environment setup, aliases,
+        and functions.
     """
 
     # resolve and validate the source configuration
@@ -61,7 +63,10 @@ def render_generated_shell(config_path: Path) -> str:
         ),
     ]
 
-    # append configured aliases and managed functions as independent sections
+    # append environment setup, configured aliases, and functions as independent sections
+    environment = render_environment(config.shell)
+    if environment:
+        shell_sections.append(environment.rstrip())
     aliases = render_aliases(config.shell)
     if aliases:
         shell_sections.append(aliases.rstrip())

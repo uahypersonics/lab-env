@@ -77,6 +77,7 @@ def test_doctor_checks_local_environment_without_network(tmp_path: Path) -> None
 
     with (
         patch.dict("os.environ", {"SHELL": "/bin/zsh"}),
+        patch("lab_env.diagnostics.find_conda_init", return_value=Path("/fake/conda.sh")),
         patch("lab_env.diagnostics.shutil.which", side_effect=lambda name: f"/fake/{name}"),
     ):
         result = runner.invoke(app, ["--config", str(config_path), "doctor"])
@@ -84,6 +85,7 @@ def test_doctor_checks_local_environment_without_network(tmp_path: Path) -> None
     assert result.exit_code == 0
     assert "[ok] config:" in result.output
     assert "[ok] shell: zsh" in result.output
+    assert "[ok] conda: /fake/conda.sh" in result.output
     assert "[ok] ssh: /fake/ssh" in result.output
     assert "[ok] rsync: /fake/rsync" in result.output
 
@@ -95,6 +97,24 @@ def test_doctor_fails_for_missing_configuration(tmp_path: Path) -> None:
 
     assert result.exit_code == 1
     assert "[error] config: configuration not found" in result.output
+
+
+def test_doctor_reports_disabled_conda_initialization(tmp_path: Path) -> None:
+    config_path = tmp_path / "config.toml"
+    config_path.write_text(
+        "schema_version = 1\n\n[shell]\ninitialize_conda = false\n",
+        encoding="utf-8",
+    )
+
+    with (
+        patch.dict("os.environ", {"SHELL": "/bin/zsh"}),
+        patch("lab_env.diagnostics.find_conda_init", return_value=None),
+        patch("lab_env.diagnostics.shutil.which", side_effect=lambda name: f"/fake/{name}"),
+    ):
+        result = runner.invoke(app, ["--config", str(config_path), "doctor"])
+
+    assert result.exit_code == 0
+    assert "[ok] conda: initialization disabled in config" in result.output
 
 
 def test_shell_cli_preview_install_status_and_uninstall(tmp_path: Path) -> None:

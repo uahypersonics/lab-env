@@ -55,6 +55,10 @@ def initialize_config(path: Path) -> Path:
         "# shell configuration: controls generated shell integration\n"
         "# --------------------------------------------------\n"
         "[shell]\n"
+        "# Make conda activate available for common Miniforge/Miniconda installations.\n"
+        "initialize_conda = true\n"
+        "# Optional explicit path for custom or module-provided Conda installations.\n"
+        '# conda_init_path = "/path/to/etc/profile.d/conda.sh"\n'
         "# Generate the standard aliases defined by lab-env.\n"
         "default_aliases = true\n"
         '# Skip selected defaults, for example: ["rm", "cp"].\n'

@@ -47,6 +47,8 @@ The shell section controls aliases written to the generated Bash or Zsh fragment
 
 ```toml
 [shell]
+initialize_conda = true
+# conda_init_path = "/custom/conda/etc/profile.d/conda.sh"
 default_aliases = true
 disabled_aliases = ["rm"]
 
@@ -57,6 +59,13 @@ project = 'cd "$HOME/work/current project"'
 
 Default aliases provide `..`, `b`, `l`, `la`, `ll`, a colorized macOS `ls`, and
 interactive `cp`, `mv`, and `rm` commands.
+
+With `initialize_conda = true`, the generated shell file sources `conda.sh` from
+common Miniforge, Miniconda, Anaconda, and Mambaforge installation locations.
+This makes `conda activate` available but does not activate an environment.
+Discovery checks an explicit `conda_init_path`, active Conda environment
+variables, `conda info --base`, and common installation locations. Set
+`conda_init_path` when Conda is installed in a custom or module-provided path.
 
 Set `default_aliases = false` to disable all defaults, or list individual names in
 `disabled_aliases`. Custom aliases are applied last, so they can add commands or

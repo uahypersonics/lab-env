@@ -6,6 +6,7 @@ import os
 import re
 import subprocess
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
@@ -42,6 +43,9 @@ def test_generated_shell_includes_default_aliases(tmp_path: Path) -> None:
         f"export LAB_ENV_CONFIG={config_path}"
     )
     assert config_section in generated_shell
+    assert "# environment: initializes optional command-line tools" in generated_shell
+    assert '"$HOME/miniforge3/etc/profile.d/conda.sh"' in generated_shell
+    assert "/opt/miniconda3/etc/profile.d/conda.sh" in generated_shell
     assert "alias ..='cd ..'" in generated_shell
     assert "alias b='cd ..'" in generated_shell
     assert "alias l='ls -altr'" in generated_shell
@@ -82,6 +86,40 @@ def test_findbig_handles_paths_with_spaces(tmp_path: Path) -> None:
     )
 
     assert "./directory with spaces/large file.bin" in result.stdout
+
+
+def test_generated_shell_initializes_miniforge_from_home(tmp_path: Path) -> None:
+    config_path = tmp_path / "config.toml"
+    config_path.write_text("schema_version = 1\n[hosts]\n", encoding="utf-8")
+    generated_path = tmp_path / "generated.sh"
+    with patch("lab_env.shell.environment.find_conda_init", return_value=None):
+        generated_path.write_text(render_generated_shell(config_path), encoding="utf-8")
+    conda_script = tmp_path / "miniforge3" / "etc" / "profile.d" / "conda.sh"
+    conda_script.parent.mkdir(parents=True)
+    conda_script.write_text('conda() { printf "conda available\\n"; }\n', encoding="utf-8")
+
+    result = subprocess.run(
+        ["/bin/zsh", "-c", f'source "{generated_path}"; conda'],
+        check=True,
+        capture_output=True,
+        env={**os.environ, "HOME": str(tmp_path), "PATH": "/usr/bin:/bin:/usr/sbin:/sbin"},
+        text=True,
+    )
+
+    assert result.stdout == "conda available\n"
+
+
+def test_generated_shell_supports_disabling_conda_initialization(tmp_path: Path) -> None:
+    config_path = tmp_path / "config.toml"
+    config_path.write_text(
+        "schema_version = 1\n\n[shell]\ninitialize_conda = false\n",
+        encoding="utf-8",
+    )
+
+    generated_shell = render_generated_shell(config_path)
+
+    assert "_lab_env_conda_sh" not in generated_shell
+    assert "etc/profile.d/conda.sh" not in generated_shell
 
 
 def test_generated_shell_supports_disabled_defaults_and_custom_aliases(tmp_path: Path) -> None:

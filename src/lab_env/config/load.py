@@ -17,7 +17,13 @@ from lab_env.config.classes import (
 
 _TOP_LEVEL_FIELDS = {"schema_version", "hosts", "shell"}
 _HOST_FIELDS = {"destination", "description", "ssh_command"}
-_SHELL_FIELDS = {"aliases", "default_aliases", "disabled_aliases"}
+_SHELL_FIELDS = {
+    "aliases",
+    "conda_init_path",
+    "default_aliases",
+    "disabled_aliases",
+    "initialize_conda",
+}
 _ALIAS_NAME_PATTERN = re.compile(r"^[A-Za-z0-9_.-]+$")
 
 
@@ -111,6 +117,16 @@ def _parse_shell(raw_shell: Any) -> ShellConfig:
         joined_fields = ", ".join(unknown_shell_fields)
         raise ConfigError(f"unknown field(s) for shell: {joined_fields}")
 
+    initialize_conda = raw_shell.get("initialize_conda", True)
+    if not isinstance(initialize_conda, bool):
+        raise ConfigError("shell.initialize_conda must be a boolean")
+
+    conda_init_path = raw_shell.get("conda_init_path")
+    if conda_init_path is not None and (
+        not isinstance(conda_init_path, str) or not conda_init_path.strip()
+    ):
+        raise ConfigError("shell.conda_init_path must be a non-empty string")
+
     default_aliases = raw_shell.get("default_aliases", True)
     if not isinstance(default_aliases, bool):
         raise ConfigError("shell.default_aliases must be a boolean")
@@ -140,6 +156,8 @@ def _parse_shell(raw_shell: Any) -> ShellConfig:
         aliases[alias_name] = command.strip()
 
     return ShellConfig(
+        initialize_conda=initialize_conda,
+        conda_init_path=conda_init_path.strip() if conda_init_path is not None else None,
         default_aliases=default_aliases,
         disabled_aliases=tuple(disabled_aliases),
         aliases=aliases,

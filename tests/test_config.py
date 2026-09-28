@@ -17,6 +17,7 @@ def test_initialized_config_includes_copy_ready_examples(tmp_path: Path) -> None
 
     config_text = config_path.read_text(encoding="utf-8")
     config = load_config(config_path)
+    assert config.shell.initialize_conda is True
     assert config.shell.default_aliases is True
     assert "# lab-env user configuration" in config_text
     assert re.search(r"# created at: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z", config_text)
@@ -24,6 +25,8 @@ def test_initialized_config_includes_copy_ready_examples(tmp_path: Path) -> None
     assert "# lab init will never overwrite this file" in config_text
     assert "# basic settings: config format used by lab-env" in config_text
     assert "# shell configuration: controls generated shell integration" in config_text
+    assert "initialize_conda = true" in config_text
+    assert '# conda_init_path = "/path/to/etc/profile.d/conda.sh"' in config_text
     assert "# user-defined aliases: persistent commands and default overrides" in config_text
     assert "# remote hosts: named systems used by connect, pull, and push" in config_text
     assert '# gs = "git status"' in config_text

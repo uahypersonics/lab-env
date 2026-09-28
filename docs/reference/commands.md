@@ -17,9 +17,10 @@ descriptions. It does not connect to a host.
 
 ## `lab doctor`
 
-Validates configuration, reports whether the active shell is Bash or Zsh, and
-locates `ssh`, `rsync`, `scp`, and `sftp` on `PATH`. Missing clients are warnings;
-invalid or missing configuration is an error.
+Validates configuration, reports whether the active shell is Bash or Zsh, checks
+for a supported Conda initialization script, and locates `ssh`, `rsync`, `scp`,
+and `sftp` on `PATH`. Missing clients or an enabled Conda integration without
+`conda.sh` are warnings; invalid or missing configuration is an error.
 
 ## `lab connect HOST [REMOTE_ARGS]...`
 
