@@ -20,8 +20,12 @@ def test_help_and_version() -> None:
     assert "init" in help_result.output
     assert "hosts" in help_result.output
     assert "doctor" in help_result.output
+    assert "connect" in help_result.output
+    assert "pull" in help_result.output
+    assert "push" in help_result.output
     assert "shell" in help_result.output
     assert "Environment" in help_result.output
+    assert "Remote" in help_result.output
     assert "Shell" in help_result.output
     assert version_result.exit_code == 0
     assert version_result.output.startswith("lab ")
@@ -80,6 +84,7 @@ def test_doctor_checks_local_environment_without_network(tmp_path: Path) -> None
     assert "[ok] config:" in result.output
     assert "[ok] shell: zsh" in result.output
     assert "[ok] ssh: /fake/ssh" in result.output
+    assert "[ok] rsync: /fake/rsync" in result.output
 
 
 def test_doctor_fails_for_missing_configuration(tmp_path: Path) -> None:

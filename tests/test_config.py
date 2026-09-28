@@ -9,6 +9,35 @@ import pytest
 from lab_env.config import ConfigError, load_config
 
 
+def test_host_uses_configured_ssh_command(tmp_path: Path) -> None:
+    config_path = tmp_path / "config.toml"
+    config_path.write_text(
+        "schema_version = 1\n\n"
+        "[hosts.cluster]\n"
+        'destination = "cluster-alias"\n'
+        'ssh_command = "/opt/ossh/bin/ssh"\n',
+        encoding="utf-8",
+    )
+
+    config = load_config(config_path)
+
+    assert config.hosts["cluster"].ssh_command == "/opt/ossh/bin/ssh"
+
+
+def test_host_defaults_to_standard_ssh(tmp_path: Path) -> None:
+    config_path = tmp_path / "config.toml"
+    config_path.write_text(
+        "schema_version = 1\n\n"
+        "[hosts.cluster]\n"
+        'destination = "cluster-alias"\n',
+        encoding="utf-8",
+    )
+
+    config = load_config(config_path)
+
+    assert config.hosts["cluster"].ssh_command == "ssh"
+
+
 def test_unknown_top_level_field_is_rejected(tmp_path: Path) -> None:
     config_path = tmp_path / "config.toml"
     config_path.write_text(

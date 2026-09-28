@@ -10,7 +10,7 @@ from typing import Any
 
 SCHEMA_VERSION = 1
 _TOP_LEVEL_FIELDS = {"schema_version", "hosts"}
-_HOST_FIELDS = {"destination", "description"}
+_HOST_FIELDS = {"destination", "description", "ssh_command"}
 
 
 class ConfigError(ValueError):
@@ -23,6 +23,7 @@ class HostConfig:
 
     destination: str
     description: str | None = None
+    ssh_command: str = "ssh"
 
 
 @dataclass(frozen=True, slots=True)
@@ -141,9 +142,14 @@ def _parse_config(raw_config: dict[str, Any]) -> LabConfig:
         if description is not None and not isinstance(description, str):
             raise ConfigError(f"hosts.{host_name}.description must be a string")
 
+        ssh_command = raw_host.get("ssh_command", "ssh")
+        if not isinstance(ssh_command, str) or not ssh_command.strip():
+            raise ConfigError(f"hosts.{host_name}.ssh_command must be a non-empty string")
+
         hosts[host_name] = HostConfig(
             destination=destination.strip(),
             description=description,
+            ssh_command=ssh_command.strip(),
         )
 
     return LabConfig(schema_version=SCHEMA_VERSION, hosts=hosts)

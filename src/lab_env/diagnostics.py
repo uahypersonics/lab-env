@@ -10,7 +10,7 @@ from pathlib import Path
 from lab_env.config import ConfigError, load_config
 
 SUPPORTED_SHELLS = {"bash", "zsh"}
-CONNECTION_CLIENTS = ("ssh", "scp", "sftp")
+CONNECTION_CLIENTS = ("ssh", "rsync", "scp", "sftp")
 
 
 @dataclass(frozen=True, slots=True)

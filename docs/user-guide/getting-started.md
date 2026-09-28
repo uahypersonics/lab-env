@@ -29,9 +29,24 @@ lab doctor
 ```
 
 `hosts` starts empty. `doctor` validates configuration, identifies Bash or Zsh,
-and locates `ssh`, `scp`, and `sftp`. It never connects to a remote system.
+and locates `ssh`, `rsync`, `scp`, and `sftp`. It never connects to a remote
+system.
 
-## 3. Preview Shell Integration
+## 3. Connect and Transfer
+
+After adding a host in `config.toml`, preview commands without connecting:
+
+```bash
+lab connect example --dry-run
+lab pull example results/ ./results/ --dry-run
+lab push example input/ work/input/ --dry-run
+```
+
+Remove `--dry-run` to execute them. Transfer paths preserve rsync's trailing
+slash behavior: `results/` copies the directory contents, while `results` copies
+the directory itself.
+
+## 4. Preview Shell Integration
 
 Before changing a startup file, inspect the exact paths and managed block:
 
@@ -53,7 +68,7 @@ lab shell preview --shell zsh --rc ./temporary.zshrc
 
 Preview does not write any files.
 
-## 4. Install and Activate
+## 5. Install and Activate
 
 ```bash
 lab shell install
@@ -71,7 +86,7 @@ Installation:
 Repeated installation does not duplicate the block. Normal shell startup is
 quiet and does not launch Python or access the network.
 
-## 5. Remove the Integration
+## 6. Remove the Integration
 
 Remove only the managed block and generated file with:
 

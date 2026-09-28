@@ -12,8 +12,9 @@ one place and manages shell integration without replacing hand-written dotfiles.
 - **Named host records** that reuse destinations and authentication from SSH configuration
 - **Explicit config paths** for testing or maintaining separate environments
 
-Connection commands, file transfers, navigation shortcuts, and site profiles
-are planned but are not implemented yet.
+Remote connections and resumable file transfers are available through configured
+hosts. Navigation shortcuts and study orchestration are planned but are not
+implemented yet.
 
 ## Quick Start
 

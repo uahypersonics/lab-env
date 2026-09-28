@@ -1,10 +1,10 @@
 # lab-env
 
-[![Tests](https://github.com/uahypersonics/lab-env/actions/workflows/test.yml/badge.svg)](https://github.com/uahypersonics/lab-env/actions/workflows/test.yml)
-[![Documentation](https://github.com/uahypersonics/lab-env/actions/workflows/docs.yml/badge.svg)](https://uahypersonics.github.io/lab-env)
-[![PyPI](https://img.shields.io/pypi/v/lab-env.svg)](https://pypi.org/project/lab-env/)
-[![Python](https://img.shields.io/pypi/pyversions/lab-env.svg)](https://pypi.org/project/lab-env/)
+[![Test](https://github.com/uahypersonics/lab-env/actions/workflows/test.yml/badge.svg)](https://github.com/uahypersonics/lab-env/actions/workflows/test.yml)
+[![Docs](https://img.shields.io/badge/docs-zensical-blue)](https://uahypersonics.github.io/lab-env/)
 [![License](https://img.shields.io/badge/license-GPL--3.0--or--later-blue.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/python-≥3.11-blue.svg)](https://www.python.org/downloads/)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
 `lab-env` is a command-line toolkit for consistent research computing
 environments on macOS and Linux. It keeps personal host configuration outside
@@ -18,11 +18,13 @@ The initial foundation implements:
 - `lab init` to create personal TOML configuration safely;
 - `lab hosts` to inspect configured SSH aliases;
 - `lab doctor` to validate configuration, shell support, and local clients;
+- `lab connect` to open SSH or run a remote command;
+- `lab pull` and `lab push` for resumable rsync transfers;
 - `lab shell preview/install/status/uninstall` for managed Bash or Zsh startup integration;
 - an explicit global `--config` option for isolated or alternate setups.
 
-Connections, file transfers, navigation shortcuts, optional shell features, and
-study orchestration are planned but are not implemented yet.
+Navigation shortcuts, optional shell features, and study orchestration are
+planned but are not implemented yet.
 
 ## Installation
 
@@ -46,6 +48,9 @@ lab --help
 lab init
 lab hosts
 lab doctor
+lab connect HOST
+lab pull HOST REMOTE_PATH [LOCAL_PATH]
+lab push HOST LOCAL_PATH REMOTE_PATH
 lab shell preview
 lab shell install
 lab shell status

@@ -18,8 +18,26 @@ descriptions. It does not connect to a host.
 ## `lab doctor`
 
 Validates configuration, reports whether the active shell is Bash or Zsh, and
-locates `ssh`, `scp`, and `sftp` on `PATH`. Missing clients are warnings; invalid
-or missing configuration is an error.
+locates `ssh`, `rsync`, `scp`, and `sftp` on `PATH`. Missing clients are warnings;
+invalid or missing configuration is an error.
+
+## `lab connect HOST [REMOTE_ARGS]...`
+
+Opens SSH to a configured host. Additional arguments run a remote command. Use
+`--dry-run` to print the safely quoted command without starting a process. Use
+`--` before remote arguments that begin with a hyphen.
+
+## `lab pull HOST REMOTE_PATH [LOCAL_PATH]`
+
+Pulls files with resumable rsync. The local path defaults to the current
+directory. Archive mode, compression, partial files, append verification, and an
+aggregate progress display are enabled. Use `--dry-run` to preview the command.
+
+## `lab push HOST LOCAL_PATH REMOTE_PATH`
+
+Pushes files with the same resumable rsync settings as `pull`. Local `~` paths
+are expanded without changing trailing-slash semantics. Use `--dry-run` to
+preview the command.
 
 ## `lab shell preview`
 
