@@ -1,11 +1,17 @@
 """Render configured aliases for Bash and Zsh."""
 
+# --------------------------------------------------
+# import necessary modules
+# --------------------------------------------------
 from __future__ import annotations
 
 import shlex
 
 from lab_env.config import ShellConfig
 
+# --------------------------------------------------
+# define default aliases
+# --------------------------------------------------
 DEFAULT_ALIASES = {
     "..": "cd ..",
     "b": "cd ..",
@@ -16,9 +22,13 @@ DEFAULT_ALIASES = {
     "cp": "cp -i",
     "mv": "mv -i",
     "rm": "rm -i",
+    "edit": "emacs -nw",
 }
 
 
+# --------------------------------------------------
+# function to write aliases to file
+# --------------------------------------------------
 def render_aliases(config: ShellConfig) -> str:
     """Render deterministic alias declarations for a generated shell file."""
 
@@ -32,7 +42,12 @@ def render_aliases(config: ShellConfig) -> str:
     if not aliases:
         return ""
 
-    lines = ["# Aliases managed by lab-env."]
+    # info lines to which aliases will follow
+    lines = [
+        "# --------------------------------------------------",
+        "# aliases managed by lab-env",
+        "# --------------------------------------------------",
+    ]
     for alias_name, command in sorted(aliases.items()):
         lines.append(f"alias {alias_name}={shlex.quote(command)}")
     return "\n".join(lines) + "\n"

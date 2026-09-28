@@ -73,6 +73,16 @@ the navigation/listing aliases `..`, `b`, `l`, `la`, `ll`, and colorized `ls`,
 plus interactive `cp`, `mv`, and `rm` safety aliases. See
 [Configuration](configuration.md#shell-aliases) to customize or disable defaults.
 
+The same generated file contains managed shell functions. `findbig` recursively
+lists files larger than 100 MB beneath the current directory. Pass a different
+`find` size to change the threshold:
+
+```bash
+findbig
+findbig 500M
+findbig 2G
+```
+
 ## 5. Install and Activate
 
 ```bash
@@ -86,8 +96,8 @@ Installation:
 1. Validates `config.toml`.
 2. Creates a sibling backup such as `.zshrc.lab-env.bak`.
 3. Adds one marked source block without replacing unrelated content.
-4. Writes configured aliases and static state to a generated shell file under
-	`~/.config/lab-env/shell/`.
+4. Writes configured aliases, managed functions, and static state to one generated
+   shell file under `~/.config/lab-env/shell/`.
 
 Repeated installation does not duplicate the block. Normal shell startup is
 quiet and does not launch Python or access the network.

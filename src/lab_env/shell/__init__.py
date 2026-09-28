@@ -1,18 +1,21 @@
 """Managed Bash and Zsh integration."""
 
-from lab_env.shell.integration import (
-    BLOCK_END,
-    BLOCK_START,
-    SUPPORTED_SHELLS,
+from lab_env.shell.installation import (
+    install_shell,
+    integration_status,
+    uninstall_shell,
+)
+from lab_env.shell.models import (
     ShellInstallResult,
     ShellIntegrationError,
     ShellPaths,
-    install_shell,
-    integration_status,
+)
+from lab_env.shell.paths import SUPPORTED_SHELLS, resolve_shell_paths
+from lab_env.shell.rendering import (
+    BLOCK_END,
+    BLOCK_START,
     render_generated_shell,
     render_managed_block,
-    resolve_shell_paths,
-    uninstall_shell,
 )
 
 __all__ = [

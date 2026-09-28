@@ -60,3 +60,13 @@ deliberately override a built-in alias. Alias names may contain letters, numbers
 `_`, `.`, and `-`; commands must be non-empty and single-line. Values are
 interpreted by the active shell, so treat the personal configuration as executable
 user input and do not copy untrusted commands into it.
+
+## Managed Functions
+
+Built-in functions are maintained separately from aliases in
+`lab_env/shell/functions.py`, then rendered into the same generated Bash or Zsh
+file. The startup file therefore needs only one managed source block.
+
+`findbig` searches recursively from the current directory and defaults to files
+larger than 100 MB. It passes matching paths directly from `find` to `du`, without
+parsing `ls` output, so spaces in filenames are preserved.
