@@ -71,9 +71,10 @@ def initialize_config(path: Path) -> Path:
         "# work = 'cd \"$HOME/work\"'\n"
         '# ll = "eza --long --header"\n\n'
         "# --------------------------------------------------\n"
-        "# remote hosts: named systems used by connect, pull, and push\n"
+        "# remote hosts: shared defaults and personal systems for connect, pull, and push\n"
         "# --------------------------------------------------\n"
-        "# Define each as [hosts.NAME]; authentication remains in ~/.ssh/config.\n"
+        "# Built-in hosts such as uahpc are ready to use; entries here add or override hosts.\n"
+        "# SSH usernames, keys, and options remain in ~/.ssh/config.\n"
         "[hosts]\n\n"
         "# Example named host and its available fields:\n"
         "# [hosts.cluster]\n"

@@ -59,7 +59,21 @@ def test_hosts_lists_valid_configuration(tmp_path: Path) -> None:
     result = runner.invoke(app, ["--config", str(config_path), "hosts"])
 
     assert result.exit_code == 0
+    assert "uahpc: hpc.arizona.edu - University of Arizona HPC" in result.output
     assert "example: example-alias - Fictitious development host" in result.output
+
+
+def test_builtin_host_can_be_used_without_local_configuration(tmp_path: Path) -> None:
+    config_path = tmp_path / "config.toml"
+    config_path.write_text("schema_version = 1\n[hosts]\n", encoding="utf-8")
+
+    result = runner.invoke(
+        app,
+        ["--config", str(config_path), "connect", "uahpc", "--dry-run"],
+    )
+
+    assert result.exit_code == 0
+    assert result.output.strip() == "ssh hpc.arizona.edu"
 
 
 def test_hosts_reports_missing_configuration(tmp_path: Path) -> None:

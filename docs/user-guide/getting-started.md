@@ -59,7 +59,13 @@ For Zsh, the preview normally resolves to:
 - startup file: `~/.zshrc`
 - generated file: `~/.config/lab-env/shell/zsh.sh`
 
-For Bash, the startup file is `~/.bashrc`. Override detection when needed:
+For Bash, `~/.bashrc` holds the interactive setup. Login Bash uses the first
+existing file among `~/.bash_profile`, `~/.bash_login`, and `~/.profile`; the
+installer adds a small managed bridge there to source `~/.bashrc` unless that
+profile already does so. This supports both SSH/login shells and interactive
+non-login shells without duplicating the generated setup.
+
+Override detection when needed:
 
 ```bash
 lab shell preview --shell bash
@@ -95,12 +101,13 @@ Installation:
 
 1. Validates `config.toml`.
 2. Creates a sibling backup such as `.zshrc.lab-env.bak`.
-3. Adds one marked source block without replacing unrelated content.
+3. Adds a marked source block to the interactive startup file and, for Bash, a
+	login bridge when needed. Existing content in either file is preserved.
 4. Writes configured aliases, managed functions, and static state to one generated
    shell file under `~/.config/lab-env/shell/`.
 
-Repeated installation does not duplicate the block. Normal shell startup is
-quiet and does not launch Python or access the network.
+Repeated installation does not duplicate managed blocks. Normal shell startup
+is quiet and does not launch Python or access the network.
 
 ## 6. Remove the Integration
 

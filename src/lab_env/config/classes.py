@@ -4,20 +4,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
+from lab_env.hosts.models import HostConfig
+
 SCHEMA_VERSION = 1
 
 
 class ConfigError(ValueError):
     """Raised when personal configuration cannot be loaded or validated."""
-
-
-@dataclass(frozen=True, slots=True)
-class HostConfig:
-    """Connection metadata for one configured host."""
-
-    destination: str
-    description: str | None = None
-    ssh_command: str = "ssh"
 
 
 @dataclass(frozen=True, slots=True)

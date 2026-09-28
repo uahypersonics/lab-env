@@ -7,7 +7,8 @@ from typing import Annotated
 import typer
 
 from lab_env.cli.context import CliContext
-from lab_env.config import ConfigError, HostConfig, load_config
+from lab_env.config import ConfigError, load_config
+from lab_env.hosts.models import HostConfig
 from lab_env.remote import (
     RemoteCommandError,
     build_connect_command,

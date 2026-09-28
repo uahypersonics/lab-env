@@ -20,9 +20,19 @@ Host `destination` values should normally name entries in `~/.ssh/config`.
 Authentication, host keys, and usernames remain under SSH configuration rather
 than being duplicated in `lab-env`.
 
-The `[hosts]` table is the namespace for named remote systems used by `connect`,
-`pull`, and `push`. Each `[hosts.NAME]` child table defines one destination that
-can be referenced by `NAME` on the command line.
+The `[hosts]` table is for personal remote systems used by `connect`, `pull`, and
+`push`. Shared destinations such as `uahpc` are provided by `lab-env` and work
+without a local entry. Each `[hosts.NAME]` child table adds a host or overrides a
+built-in entry, and the name is used on the command line.
+
+The built-in `uahpc` destination is `hpc.arizona.edu`; SSH uses the current local
+username unless you specify `User` for that host in `~/.ssh/config`. For example,
+you can customize the built-in destination locally with:
+
+```toml
+[hosts.uahpc]
+destination = "chader@hpc.arizona.edu"
+```
 
 When a host requires a different SSH-compatible executable, configure its path
 explicitly. `connect`, `pull`, and `push` all use the same executable:

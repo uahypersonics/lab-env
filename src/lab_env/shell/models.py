@@ -17,6 +17,15 @@ class ShellPaths:
     shell: str
     rc_path: Path
     generated_path: Path
+    login_rc_path: Path | None = None
+
+    @property
+    def startup_paths(self) -> tuple[Path, ...]:
+        """Return all user startup files managed for this shell."""
+
+        if self.login_rc_path is None or self.login_rc_path == self.rc_path:
+            return (self.rc_path,)
+        return (self.rc_path, self.login_rc_path)
 
 
 @dataclass(frozen=True, slots=True)
@@ -25,4 +34,10 @@ class ShellInstallResult:
 
     paths: ShellPaths
     changed: bool
-    backup_path: Path | None
+    backup_paths: tuple[Path, ...]
+
+    @property
+    def backup_path(self) -> Path | None:
+        """Return the first backup path for single-file callers."""
+
+        return self.backup_paths[0] if self.backup_paths else None

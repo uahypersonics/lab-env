@@ -8,6 +8,7 @@ from pathlib import Path
 from lab_env.shell.models import ShellIntegrationError, ShellPaths
 
 SUPPORTED_SHELLS = {"bash": ".bashrc", "zsh": ".zshrc"}
+BASH_LOGIN_FILES = (".bash_profile", ".bash_login", ".profile")
 
 
 def resolve_shell_paths(
@@ -37,10 +38,18 @@ def resolve_shell_paths(
         raise ShellIntegrationError(f"unsupported shell '{detected}'; choose one of: {supported}")
 
     resolved_config = config_path.expanduser().resolve()
-    resolved_rc = (rc_path or Path.home() / SUPPORTED_SHELLS[shell_name]).expanduser()
+    home_path = Path.home()
+    resolved_rc = (rc_path or home_path / SUPPORTED_SHELLS[shell_name]).expanduser()
+    login_rc_path = None
+    if shell_name == "bash" and rc_path is None:
+        login_rc_path = next(
+            (home_path / name for name in BASH_LOGIN_FILES if (home_path / name).exists()),
+            home_path / BASH_LOGIN_FILES[0],
+        )
     generated_path = resolved_config.parent / "shell" / f"{shell_name}.sh"
     return ShellPaths(
         shell=shell_name,
         rc_path=resolved_rc,
         generated_path=generated_path,
+        login_rc_path=login_rc_path,
     )

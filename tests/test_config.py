@@ -8,6 +8,7 @@ from pathlib import Path
 import pytest
 
 from lab_env.config import ConfigError, initialize_config, load_config
+from lab_env.hosts.catalog import available_hosts
 
 
 def test_initialized_config_includes_copy_ready_examples(tmp_path: Path) -> None:
@@ -28,7 +29,10 @@ def test_initialized_config_includes_copy_ready_examples(tmp_path: Path) -> None
     assert "initialize_conda = true" in config_text
     assert '# conda_init_path = "/path/to/etc/profile.d/conda.sh"' in config_text
     assert "# user-defined aliases: persistent commands and default overrides" in config_text
-    assert "# remote hosts: named systems used by connect, pull, and push" in config_text
+    assert (
+        "# remote hosts: shared defaults and personal systems for connect, pull, and push"
+        in config_text
+    )
     assert '# gs = "git status"' in config_text
     assert "# work = 'cd \"$HOME/work\"'" in config_text
     assert '# Skip selected defaults, for example: ["rm", "cp"].' in config_text
@@ -60,6 +64,33 @@ def test_host_defaults_to_standard_ssh(tmp_path: Path) -> None:
     config = load_config(config_path)
 
     assert config.hosts["cluster"].ssh_command == "ssh"
+
+
+def test_builtin_hosts_are_available_without_user_entries(tmp_path: Path) -> None:
+    config_path = tmp_path / "config.toml"
+    config_path.write_text("schema_version = 1\n[hosts]\n", encoding="utf-8")
+
+    config = load_config(config_path)
+
+    assert config.hosts == {}
+    hosts = available_hosts(config.hosts)
+    assert hosts["uahpc"].destination == "hpc.arizona.edu"
+    assert hosts["uahpc"].description == "University of Arizona HPC"
+
+
+def test_user_host_entry_overrides_builtin_host(tmp_path: Path) -> None:
+    config_path = tmp_path / "config.toml"
+    config_path.write_text(
+        'schema_version = 1\n\n[hosts.uahpc]\ndestination = "chader@hpc.arizona.edu"\n',
+        encoding="utf-8",
+    )
+
+    config = load_config(config_path)
+
+    assert config.hosts["uahpc"].destination == "chader@hpc.arizona.edu"
+    hosts = available_hosts(config.hosts)
+    assert hosts["uahpc"].destination == "chader@hpc.arizona.edu"
+    assert hosts["uahpc"].description == "University of Arizona HPC"
 
 
 def test_invalid_shell_alias_name_is_rejected(tmp_path: Path) -> None:

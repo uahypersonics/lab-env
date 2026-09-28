@@ -9,7 +9,7 @@ from unittest.mock import patch
 from typer.testing import CliRunner
 
 from lab_env.cli import app
-from lab_env.config import HostConfig
+from lab_env.hosts.models import HostConfig
 from lab_env.remote import build_connect_command, build_transfer_command
 
 runner = CliRunner()

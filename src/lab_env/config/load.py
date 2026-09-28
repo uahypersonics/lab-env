@@ -10,10 +10,10 @@ from typing import Any
 from lab_env.config.classes import (
     SCHEMA_VERSION,
     ConfigError,
-    HostConfig,
     LabConfig,
     ShellConfig,
 )
+from lab_env.hosts.models import HostConfig
 
 _TOP_LEVEL_FIELDS = {"schema_version", "hosts", "shell"}
 _HOST_FIELDS = {"destination", "description", "ssh_command"}

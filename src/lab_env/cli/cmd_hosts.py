@@ -6,6 +6,7 @@ import typer
 
 from lab_env.cli.context import CliContext
 from lab_env.config import ConfigError, load_config
+from lab_env.hosts.catalog import available_hosts
 
 
 def cmd_hosts(context: typer.Context) -> None:
@@ -18,10 +19,11 @@ def cmd_hosts(context: typer.Context) -> None:
         typer.echo(f"error: {error}", err=True)
         raise typer.Exit(2) from error
 
-    if not config.hosts:
+    hosts = available_hosts(config.hosts)
+    if not hosts:
         typer.echo("no hosts configured")
         return
 
-    for host_name, host in sorted(config.hosts.items()):
+    for host_name, host in sorted(hosts.items()):
         description = f" - {host.description}" if host.description else ""
         typer.echo(f"{host_name}: {host.destination}{description}")

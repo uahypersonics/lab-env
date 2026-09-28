@@ -42,22 +42,26 @@ preview the command.
 
 ## `lab shell preview`
 
-Prints the detected shell, startup path, generated aliases and static state, and
-exact managed block without writing files. Use `--shell bash|zsh` and `--rc PATH`
-to override detection for inspection or controlled tests.
+Prints the detected shell, startup paths, generated aliases and static state, and
+managed blocks without writing files. Bash previews include `~/.bashrc` and the
+login profile selected from `~/.bash_profile`, `~/.bash_login`, or `~/.profile`.
+Use `--shell bash|zsh` and `--rc PATH` to override detection for inspection or
+controlled tests.
 
 ## `lab shell install`
 
-Validates personal configuration, writes configured aliases to a static shell
-fragment under `~/.config/lab-env/shell/`, and adds one marked source block to
-`.bashrc` or `.zshrc`. Existing startup files are backed up beside the original.
-Repeated installation is idempotent, and symlinked startup files are rejected.
+Validates personal configuration, writes generated shell setup to a static
+fragment under `~/.config/lab-env/shell/`, and adds marked startup blocks.
+For Bash, it installs into `.bashrc` and ensures the effective login profile also
+loads it, unless that profile already sources `.bashrc`. Existing startup files
+are backed up beside the original. Repeated installation is idempotent, and
+symlinked startup files are rejected.
 
 ## `lab shell status`
 
-Reports whether the managed block and generated shell file are both present.
+Reports whether the managed startup blocks and generated shell file are present.
 
 ## `lab shell uninstall`
 
-Backs up the startup file, removes only the marked block, and deletes the
-generated fragment. Other dotfile content is preserved.
+Backs up modified startup files, removes only lab-env-managed blocks, and deletes
+the generated fragment. Other dotfile content is preserved.

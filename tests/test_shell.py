@@ -33,6 +33,15 @@ def _test_shell_executable() -> str:
     return shell_executable
 
 
+def _test_bash_executable() -> str:
+    """Find Bash for login and interactive startup tests."""
+
+    bash_executable = shutil.which("bash", path=os.defpath)
+    if bash_executable is None:
+        pytest.skip("Bash startup test requires bash")
+    return bash_executable
+
+
 def test_generated_shell_includes_default_aliases(tmp_path: Path) -> None:
     config_path = tmp_path / "config.toml"
     config_path.write_text("schema_version = 1\n[hosts]\n", encoding="utf-8")
@@ -240,3 +249,81 @@ def test_install_rejects_incomplete_managed_markers(tmp_path: Path) -> None:
         install_shell(paths, config_path)
 
     assert rc_path.read_text(encoding="utf-8") == f"existing\n{BLOCK_START}\n"
+
+
+def test_bash_install_supports_login_and_nonlogin_shells(tmp_path: Path) -> None:
+    home_path = tmp_path / "home"
+    home_path.mkdir()
+    config_path = home_path / ".config" / "lab-env" / "config.toml"
+    config_path.parent.mkdir(parents=True)
+    config_path.write_text("schema_version = 1\n[hosts]\n", encoding="utf-8")
+    bashrc_path = home_path / ".bashrc"
+    bashrc_path.write_text("# existing interactive settings\n", encoding="utf-8")
+    profile_path = home_path / ".profile"
+    profile_path.write_text("# existing login settings\n", encoding="utf-8")
+
+    with patch("lab_env.shell.paths.Path.home", return_value=home_path):
+        paths = resolve_shell_paths(config_path, shell="bash")
+
+    assert paths.rc_path == bashrc_path
+    assert paths.login_rc_path == profile_path
+    result = install_shell(paths, config_path)
+
+    assert len(result.backup_paths) == 2
+    assert BLOCK_START in bashrc_path.read_text(encoding="utf-8")
+    profile_text = profile_path.read_text(encoding="utf-8")
+    assert profile_text.startswith("# existing login settings\n")
+    assert "${BASH_VERSION:-}" in profile_text
+    assert str(bashrc_path) in profile_text
+    assert integration_status(paths) == "installed"
+
+    shell_environment = {
+        "HOME": str(home_path),
+        "PATH": "/usr/bin:/bin:/usr/sbin:/sbin",
+        "SHELL": "/bin/bash",
+    }
+    login_result = subprocess.run(
+        [_test_bash_executable(), "--login", "-c", "type -t findbig"],
+        check=True,
+        capture_output=True,
+        env=shell_environment,
+        text=True,
+    )
+    nonlogin_result = subprocess.run(
+        [_test_bash_executable(), "--noprofile", "-i", "-c", "type -t findbig"],
+        check=True,
+        capture_output=True,
+        env=shell_environment,
+        text=True,
+    )
+
+    assert login_result.stdout.strip() == "function"
+    assert nonlogin_result.stdout.strip() == "function"
+
+    backup_paths = uninstall_shell(paths)
+
+    assert len(backup_paths) == 2
+    assert bashrc_path.read_text(encoding="utf-8") == "# existing interactive settings\n"
+    assert profile_path.read_text(encoding="utf-8") == "# existing login settings\n"
+    assert integration_status(paths) == "not installed"
+
+
+def test_bash_install_avoids_duplicate_login_bridge(tmp_path: Path) -> None:
+    home_path = tmp_path / "home"
+    home_path.mkdir()
+    config_path = tmp_path / "config.toml"
+    config_path.write_text("schema_version = 1\n[hosts]\n", encoding="utf-8")
+    profile_path = home_path / ".profile"
+    profile_path.write_text(
+        'if [ -f "$HOME/.bashrc" ]; then\n    . "$HOME/.bashrc"\nfi\n',
+        encoding="utf-8",
+    )
+
+    with patch("lab_env.shell.paths.Path.home", return_value=home_path):
+        paths = resolve_shell_paths(config_path, shell="bash")
+
+    install_shell(paths, config_path)
+
+    assert paths.login_rc_path == profile_path
+    assert "lab-env bash login" not in profile_path.read_text(encoding="utf-8")
+    assert integration_status(paths) == "installed"

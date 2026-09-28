@@ -9,7 +9,9 @@ from dataclasses import dataclass
 from os.path import expanduser
 from typing import Literal
 
-from lab_env.config import HostConfig, LabConfig
+from lab_env.config import LabConfig
+from lab_env.hosts.catalog import available_hosts
+from lab_env.hosts.models import HostConfig
 
 
 class RemoteCommandError(ValueError):
@@ -29,7 +31,7 @@ def resolve_host(config: LabConfig, host_name: str) -> HostConfig:
 
     Args:
         config: Validated personal configuration.
-        host_name: Name under the ``hosts`` configuration table.
+        host_name: Built-in or user-configured host name.
 
     Returns:
         Matching host configuration.
@@ -38,10 +40,11 @@ def resolve_host(config: LabConfig, host_name: str) -> HostConfig:
         RemoteCommandError: If the host is not configured.
     """
 
-    host = config.hosts.get(host_name)
+    hosts = available_hosts(config.hosts)
+    host = hosts.get(host_name)
     if host is None:
-        available = ", ".join(sorted(config.hosts)) or "none"
-        raise RemoteCommandError(f"unknown host '{host_name}'; configured hosts: {available}")
+        available = ", ".join(sorted(hosts)) or "none"
+        raise RemoteCommandError(f"unknown host '{host_name}'; available hosts: {available}")
     return host
 
 

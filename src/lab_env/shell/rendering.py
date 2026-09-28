@@ -16,6 +16,8 @@ from lab_env.shell.functions import render_functions
 
 BLOCK_START = "# >>> lab-env >>>"
 BLOCK_END = "# <<< lab-env <<<"
+BASH_LOGIN_BLOCK_START = "# >>> lab-env bash login >>>"
+BASH_LOGIN_BLOCK_END = "# <<< lab-env bash login <<<"
 
 
 # --------------------------------------------------
@@ -97,3 +99,18 @@ def render_managed_block(generated_path: Path) -> str:
         f"{BLOCK_START}\nif [ -f {quoted_path} ]; then\n    . {quoted_path}\nfi\n{BLOCK_END}\n"
     )
     return managed_block
+
+
+def render_bash_login_block(bashrc_path: Path) -> str:
+    """Render a Bash login-file block that loads the interactive Bash config."""
+
+    quoted_path = shlex.quote(str(bashrc_path.expanduser().resolve()))
+    login_block = (
+        f"{BASH_LOGIN_BLOCK_START}\n"
+        'if [ -n "${BASH_VERSION:-}" ] && [ -f '
+        f"{quoted_path} ]; then\n"
+        f"    . {quoted_path}\n"
+        "fi\n"
+        f"{BASH_LOGIN_BLOCK_END}\n"
+    )
+    return login_block

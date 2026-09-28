@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from lab_env.config import ConfigError, LabConfig, load_config
+from lab_env.hosts.catalog import available_hosts
 from lab_env.shell.environment import find_conda_init
 
 SUPPORTED_SHELLS = {"bash", "zsh"}
@@ -42,7 +43,7 @@ def run_diagnostics(config_path: Path) -> list[DiagnosticResult]:
             DiagnosticResult(
                 "config",
                 "ok",
-                f"{config_path.expanduser()} ({len(config.hosts)} host(s))",
+                f"{config_path.expanduser()} ({len(available_hosts(config.hosts))} host(s))",
             )
         )
     except ConfigError as error:
