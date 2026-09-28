@@ -115,6 +115,57 @@ def test_findbig_handles_paths_with_spaces(tmp_path: Path) -> None:
     assert "./directory with spaces/large file.bin" in result.stdout
 
 
+def test_qs_uses_slurm_or_pbs_command_available_on_path(tmp_path: Path) -> None:
+    config_path = tmp_path / "config.toml"
+    config_path.write_text("schema_version = 1\n[hosts]\n", encoding="utf-8")
+    generated_path = tmp_path / "generated.sh"
+    generated_path.write_text(render_generated_shell(config_path), encoding="utf-8")
+    scheduler_bin = tmp_path / "scheduler-bin"
+    scheduler_bin.mkdir()
+
+    for command_name in ("squeue", "qstat"):
+        command_path = scheduler_bin / command_name
+        command_path.write_text(
+            f"#!/bin/sh\nprintf '{command_name}:%s\\n' \"$*\"\n",
+            encoding="utf-8",
+        )
+        command_path.chmod(0o755)
+
+    pbs_bin = tmp_path / "pbs-bin"
+    pbs_bin.mkdir()
+    pbs_command_path = pbs_bin / "qstat"
+    pbs_command_path.write_text(
+        "#!/bin/sh\nprintf 'qstat:%s\\n' \"$*\"\n",
+        encoding="utf-8",
+    )
+    pbs_command_path.chmod(0o755)
+
+    shell_environment = {
+        **os.environ,
+        "HOME": str(tmp_path),
+        "PATH": str(scheduler_bin),
+        "USER": "test-user",
+    }
+    slurm_result = subprocess.run(
+        [_test_bash_executable(), "-c", f'source "{generated_path}"; qs --start'],
+        check=True,
+        capture_output=True,
+        env=shell_environment,
+        text=True,
+    )
+    pbs_environment = {**shell_environment, "PATH": str(pbs_bin)}
+    pbs_result = subprocess.run(
+        [_test_bash_executable(), "-c", f'source "{generated_path}"; qs --start'],
+        check=True,
+        capture_output=True,
+        env=pbs_environment,
+        text=True,
+    )
+
+    assert slurm_result.stdout.strip() == "squeue:-u test-user --start"
+    assert pbs_result.stdout.strip() == "qstat:-u test-user --start"
+
+
 def test_generated_shell_initializes_miniforge_from_home(tmp_path: Path) -> None:
     config_path = tmp_path / "config.toml"
     config_path.write_text("schema_version = 1\n[hosts]\n", encoding="utf-8")

@@ -89,6 +89,9 @@ findbig 500M
 findbig 2G
 ```
 
+Use `qs` to list your jobs; it selects Slurm `squeue` or PBS `qstat` based on
+which scheduler command is available on the system.
+
 ## 5. Install and Activate
 
 ```bash

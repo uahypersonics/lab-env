@@ -19,6 +19,23 @@ def render_findbig() -> str:
     return fcn_lines
 
 
+def render_qs() -> str:
+    """Render a queue shortcut that selects Slurm or PBS at runtime."""
+
+    fcn_lines = """qs() {
+    local scheduler_user="${USER:-$(id -un)}"
+    if command -v squeue >/dev/null 2>&1; then
+        squeue -u "$scheduler_user" "$@"
+    elif command -v qstat >/dev/null 2>&1; then
+        qstat -u "$scheduler_user" "$@"
+    else
+        printf '%s\\n' 'qs: neither squeue (Slurm) nor qstat (PBS) was found on PATH' >&2
+        return 127
+    fi
+}"""
+    return fcn_lines
+
+
 # --------------------------------------------------
 # compose generated functions
 # --------------------------------------------------
@@ -30,5 +47,6 @@ def render_functions() -> str:
         "# functions managed by lab-env",
         "# --------------------------------------------------",
         render_findbig(),
+        render_qs(),
     ]
     return "\n".join(lines) + "\n"

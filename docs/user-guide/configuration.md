@@ -93,3 +93,7 @@ file. The startup file therefore needs only one managed source block.
 `findbig` searches recursively from the current directory and defaults to files
 larger than 100 MB. It passes matching paths directly from `find` to `du`, without
 parsing `ls` output, so spaces in filenames are preserved.
+
+`qs` lists your jobs using the scheduler available on the system: `squeue -u
+"$USER"` for Slurm or `qstat -u "$USER"` for PBS. Additional arguments are
+passed to the selected scheduler command.
