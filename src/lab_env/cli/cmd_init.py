@@ -1,5 +1,8 @@
 """Initialize a personal lab-env configuration."""
 
+# --------------------------------------------------
+# load necessary modules
+# --------------------------------------------------
 from __future__ import annotations
 
 import typer
@@ -8,6 +11,9 @@ from lab_env.cli.context import CliContext
 from lab_env.config import initialize_config
 
 
+# --------------------------------------------------
+# init command
+# --------------------------------------------------
 def cmd_init(context: typer.Context) -> None:
     """Create a personal configuration file without changing shell dotfiles."""
 

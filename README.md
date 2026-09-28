@@ -20,7 +20,7 @@ The initial foundation implements:
 - `lab doctor` to validate configuration, shell support, and local clients;
 - `lab connect` to open SSH or run a remote command;
 - `lab pull` and `lab push` for resumable rsync transfers;
-- `lab shell preview/install/status/uninstall` for managed Bash or Zsh startup integration;
+- `lab shell preview/install/status/uninstall` for managed Bash or Zsh aliases and startup integration;
 - an explicit global `--config` option for isolated or alternate setups.
 
 Navigation shortcuts, optional shell features, and study orchestration are

@@ -12,10 +12,67 @@ from lab_env.shell import (
     ShellIntegrationError,
     install_shell,
     integration_status,
+    render_generated_shell,
     render_managed_block,
     resolve_shell_paths,
     uninstall_shell,
 )
+
+
+def test_generated_shell_includes_default_aliases(tmp_path: Path) -> None:
+    config_path = tmp_path / "config.toml"
+    config_path.write_text("schema_version = 1\n[hosts]\n", encoding="utf-8")
+
+    generated_shell = render_generated_shell(config_path)
+
+    assert "alias ..='cd ..'" in generated_shell
+    assert "alias b='cd ..'" in generated_shell
+    assert "alias l='ls -altr'" in generated_shell
+    assert "alias la='ls -lah'" in generated_shell
+    assert "alias ll='ls -lh'" in generated_shell
+    assert "alias ls='ls -C -G -h'" in generated_shell
+    assert "alias cp='cp -i'" in generated_shell
+    assert "alias mv='mv -i'" in generated_shell
+    assert "alias rm='rm -i'" in generated_shell
+
+
+def test_generated_shell_supports_disabled_defaults_and_custom_aliases(tmp_path: Path) -> None:
+    config_path = tmp_path / "config.toml"
+    config_path.write_text(
+        "schema_version = 1\n\n"
+        "[shell]\n"
+        'disabled_aliases = ["b", "rm"]\n\n'
+        "[shell.aliases]\n"
+        'll = "eza --long --header"\n'
+        'project = "cd \\"$HOME/work/current project\\""\n\n'
+        "[hosts]\n",
+        encoding="utf-8",
+    )
+
+    generated_shell = render_generated_shell(config_path)
+
+    assert "alias b=" not in generated_shell
+    assert "alias rm=" not in generated_shell
+    assert "alias ll='eza --long --header'" in generated_shell
+    assert "alias project='cd \"$HOME/work/current project\"'" in generated_shell
+
+
+def test_generated_shell_supports_disabling_all_defaults(tmp_path: Path) -> None:
+    config_path = tmp_path / "config.toml"
+    config_path.write_text(
+        "schema_version = 1\n\n"
+        "[shell]\n"
+        "default_aliases = false\n\n"
+        "[shell.aliases]\n"
+        'gs = "git status"\n',
+        encoding="utf-8",
+    )
+
+    generated_shell = render_generated_shell(config_path)
+
+    assert "alias ll=" not in generated_shell
+    assert "alias rm=" not in generated_shell
+    assert "alias gs='git status'" in generated_shell
 
 
 def test_install_is_idempotent_and_preserves_existing_content(tmp_path: Path) -> None:
@@ -45,6 +102,8 @@ def test_install_is_idempotent_and_preserves_existing_content(tmp_path: Path) ->
 
 def test_uninstall_removes_only_owned_content(tmp_path: Path) -> None:
     config_path = tmp_path / "config" / "config.toml"
+    config_path.parent.mkdir()
+    config_path.write_text("schema_version = 1\n[hosts]\n", encoding="utf-8")
     rc_path = tmp_path / ".bashrc"
     rc_path.write_text("alias existing='echo existing'\n", encoding="utf-8")
     paths = resolve_shell_paths(config_path, shell="bash", rc_path=rc_path)

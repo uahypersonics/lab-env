@@ -41,16 +41,16 @@ preview the command.
 
 ## `lab shell preview`
 
-Prints the detected shell, startup path, generated static file, and exact managed
-block without writing files. Use `--shell bash|zsh` and `--rc PATH` to override
-detection for inspection or controlled tests.
+Prints the detected shell, startup path, generated aliases and static state, and
+exact managed block without writing files. Use `--shell bash|zsh` and `--rc PATH`
+to override detection for inspection or controlled tests.
 
 ## `lab shell install`
 
-Validates personal configuration, writes a static shell fragment under
-`~/.config/lab-env/shell/`, and adds one marked source block to `.bashrc` or
-`.zshrc`. Existing startup files are backed up beside the original. Repeated
-installation is idempotent, and symlinked startup files are rejected.
+Validates personal configuration, writes configured aliases to a static shell
+fragment under `~/.config/lab-env/shell/`, and adds one marked source block to
+`.bashrc` or `.zshrc`. Existing startup files are backed up beside the original.
+Repeated installation is idempotent, and symlinked startup files are rejected.
 
 ## `lab shell status`
 

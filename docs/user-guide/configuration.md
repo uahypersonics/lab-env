@@ -36,3 +36,27 @@ options. Keep connection options, usernames, keys, and jump hosts in
 
 The example is deliberately fictitious. Do not commit personal hostnames,
 accounts, allocations, or credentials.
+
+## Shell Aliases
+
+The shell section controls aliases written to the generated Bash or Zsh fragment:
+
+```toml
+[shell]
+default_aliases = true
+disabled_aliases = ["rm"]
+
+[shell.aliases]
+gs = "git status"
+project = 'cd "$HOME/work/current project"'
+```
+
+Default aliases provide `..`, `b`, `l`, `la`, `ll`, a colorized macOS `ls`, and
+interactive `cp`, `mv`, and `rm` commands.
+
+Set `default_aliases = false` to disable all defaults, or list individual names in
+`disabled_aliases`. Custom aliases are applied last, so they can add commands or
+deliberately override a built-in alias. Alias names may contain letters, numbers,
+`_`, `.`, and `-`; commands must be non-empty and single-line. Values are
+interpreted by the active shell, so treat the personal configuration as executable
+user input and do not copy untrusted commands into it.

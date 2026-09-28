@@ -1,80 +1,24 @@
-"""Personal configuration loading and validation."""
+"""TOML configuration loading and strict schema validation."""
 
 from __future__ import annotations
 
-import os
+import re
 import tomllib
-from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-SCHEMA_VERSION = 1
-_TOP_LEVEL_FIELDS = {"schema_version", "hosts"}
+from lab_env.config.classes import (
+    SCHEMA_VERSION,
+    ConfigError,
+    HostConfig,
+    LabConfig,
+    ShellConfig,
+)
+
+_TOP_LEVEL_FIELDS = {"schema_version", "hosts", "shell"}
 _HOST_FIELDS = {"destination", "description", "ssh_command"}
-
-
-class ConfigError(ValueError):
-    """Raised when personal configuration cannot be loaded or validated."""
-
-
-@dataclass(frozen=True, slots=True)
-class HostConfig:
-    """Connection metadata for one configured host."""
-
-    destination: str
-    description: str | None = None
-    ssh_command: str = "ssh"
-
-
-@dataclass(frozen=True, slots=True)
-class LabConfig:
-    """Validated personal lab-env configuration."""
-
-    schema_version: int = SCHEMA_VERSION
-    hosts: dict[str, HostConfig] = field(default_factory=dict)
-
-
-def default_config_path() -> Path:
-    """Return the platform-neutral user configuration path."""
-
-    configured_path = os.environ.get("LAB_ENV_CONFIG")
-    if configured_path:
-        return Path(configured_path).expanduser()
-
-    config_root = os.environ.get("XDG_CONFIG_HOME")
-    if config_root:
-        return Path(config_root).expanduser() / "lab-env" / "config.toml"
-    return Path.home() / ".config" / "lab-env" / "config.toml"
-
-
-def initialize_config(path: Path) -> Path:
-    """Create a default personal configuration without replacing existing data.
-
-    Args:
-        path: Destination configuration path.
-
-    Returns:
-        The resolved path written to disk.
-
-    Raises:
-        FileExistsError: If the destination already exists.
-        OSError: If the destination cannot be created.
-    """
-
-    resolved_path = path.expanduser()
-    resolved_path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
-    config_text = (
-        "# lab-env personal configuration\n"
-        f"schema_version = {SCHEMA_VERSION}\n\n"
-        "# Add named SSH destinations under [hosts].\n"
-        "# Authentication remains in ~/.ssh/config.\n"
-        "[hosts]\n"
-    )
-
-    with resolved_path.open("x", encoding="utf-8") as stream:
-        stream.write(config_text)
-
-    return resolved_path.resolve()
+_SHELL_FIELDS = {"aliases", "default_aliases", "disabled_aliases"}
+_ALIAS_NAME_PATTERN = re.compile(r"^[A-Za-z0-9_.-]+$")
 
 
 def load_config(path: Path) -> LabConfig:
@@ -152,4 +96,51 @@ def _parse_config(raw_config: dict[str, Any]) -> LabConfig:
             ssh_command=ssh_command.strip(),
         )
 
-    return LabConfig(schema_version=SCHEMA_VERSION, hosts=hosts)
+    shell = _parse_shell(raw_config.get("shell", {}))
+    return LabConfig(schema_version=SCHEMA_VERSION, hosts=hosts, shell=shell)
+
+
+def _parse_shell(raw_shell: Any) -> ShellConfig:
+    """Validate shell alias configuration."""
+
+    if not isinstance(raw_shell, dict):
+        raise ConfigError("shell must be a TOML table")
+
+    unknown_shell_fields = sorted(set(raw_shell) - _SHELL_FIELDS)
+    if unknown_shell_fields:
+        joined_fields = ", ".join(unknown_shell_fields)
+        raise ConfigError(f"unknown field(s) for shell: {joined_fields}")
+
+    default_aliases = raw_shell.get("default_aliases", True)
+    if not isinstance(default_aliases, bool):
+        raise ConfigError("shell.default_aliases must be a boolean")
+
+    raw_disabled_aliases = raw_shell.get("disabled_aliases", [])
+    if not isinstance(raw_disabled_aliases, list):
+        raise ConfigError("shell.disabled_aliases must be an array")
+
+    disabled_aliases: list[str] = []
+    for alias_name in raw_disabled_aliases:
+        if not isinstance(alias_name, str) or not _ALIAS_NAME_PATTERN.fullmatch(alias_name):
+            raise ConfigError(f"disabled shell alias name is invalid: {alias_name!r}")
+        disabled_aliases.append(alias_name)
+
+    raw_aliases = raw_shell.get("aliases", {})
+    if not isinstance(raw_aliases, dict):
+        raise ConfigError("shell.aliases must be a TOML table")
+
+    aliases: dict[str, str] = {}
+    for alias_name, command in raw_aliases.items():
+        if not _ALIAS_NAME_PATTERN.fullmatch(alias_name):
+            raise ConfigError(f"shell alias name is invalid: {alias_name!r}")
+        if not isinstance(command, str) or not command.strip():
+            raise ConfigError(f"shell.aliases.{alias_name} must be a non-empty string")
+        if "\n" in command or "\r" in command:
+            raise ConfigError(f"shell.aliases.{alias_name} must be a single-line command")
+        aliases[alias_name] = command.strip()
+
+    return ShellConfig(
+        default_aliases=default_aliases,
+        disabled_aliases=tuple(disabled_aliases),
+        aliases=aliases,
+    )

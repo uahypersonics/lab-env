@@ -68,6 +68,11 @@ lab shell preview --shell zsh --rc ./temporary.zshrc
 
 Preview does not write any files.
 
+The generated-file preview includes the configured aliases. By default these are
+the navigation/listing aliases `..`, `b`, `l`, `la`, `ll`, and colorized `ls`,
+plus interactive `cp`, `mv`, and `rm` safety aliases. See
+[Configuration](configuration.md#shell-aliases) to customize or disable defaults.
+
 ## 5. Install and Activate
 
 ```bash
@@ -81,7 +86,8 @@ Installation:
 1. Validates `config.toml`.
 2. Creates a sibling backup such as `.zshrc.lab-env.bak`.
 3. Adds one marked source block without replacing unrelated content.
-4. Writes a static generated shell file under `~/.config/lab-env/shell/`.
+4. Writes configured aliases and static state to a generated shell file under
+	`~/.config/lab-env/shell/`.
 
 Repeated installation does not duplicate the block. Normal shell startup is
 quiet and does not launch Python or access the network.
