@@ -1,16 +1,14 @@
-"""Command-line interface for lab-env."""
+"""Preview and manage lab-env shell startup integration."""
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Annotated
 
 import typer
 
-from lab_env import __version__
-from lab_env.config import ConfigError, default_config_path, initialize_config, load_config
-from lab_env.diagnostics import run_diagnostics
+from lab_env.cli.context import CliContext
+from lab_env.config import ConfigError, load_config
 from lab_env.shell import (
     ShellIntegrationError,
     ShellPaths,
@@ -22,109 +20,11 @@ from lab_env.shell import (
     uninstall_shell,
 )
 
-app = typer.Typer(
-    name="lab",
-    help="Set up and inspect consistent research computing environments.",
+shell_app = typer.Typer(
+    help="Preview and manage shell startup integration.",
     no_args_is_help=True,
+    add_completion=False,
 )
-shell_app = typer.Typer(help="Preview and manage shell startup integration.")
-app.add_typer(shell_app, name="shell")
-
-
-@dataclass(slots=True)
-class CliContext:
-    """Values shared by lab subcommands."""
-
-    config_path: Path
-
-
-def _version_callback(value: bool) -> None:
-    """Print the installed package version and exit."""
-
-    if value:
-        typer.echo(f"lab {__version__}")
-        raise typer.Exit()
-
-
-@app.callback()
-def main(
-    context: typer.Context,
-    config: Annotated[
-        Path | None,
-        typer.Option(
-            "--config",
-            help="Personal TOML configuration path.",
-            dir_okay=False,
-        ),
-    ] = None,
-    version: Annotated[
-        bool,
-        typer.Option(
-            "--version",
-            callback=_version_callback,
-            is_eager=True,
-            help="Show the installed version and exit.",
-        ),
-    ] = False,
-) -> None:
-    """Configure the shared command context."""
-
-    del version
-    context.obj = CliContext(config_path=config or default_config_path())
-
-
-@app.command("init")
-def init_command(context: typer.Context) -> None:
-    """Create a personal configuration file without changing shell dotfiles."""
-
-    cli_context: CliContext = context.obj
-    try:
-        config_path = initialize_config(cli_context.config_path)
-    except FileExistsError:
-        typer.echo(
-            f"configuration already exists: {cli_context.config_path.expanduser()}",
-            err=True,
-        )
-        raise typer.Exit(1) from None
-    except OSError as error:
-        typer.echo(f"error: cannot create configuration: {error}", err=True)
-        raise typer.Exit(1) from error
-
-    typer.echo(f"created configuration: {config_path}")
-    typer.echo("no shell startup files were modified")
-
-
-@app.command("hosts")
-def hosts_command(context: typer.Context) -> None:
-    """List configured host aliases without making connections."""
-
-    cli_context: CliContext = context.obj
-    try:
-        config = load_config(cli_context.config_path)
-    except ConfigError as error:
-        typer.echo(f"error: {error}", err=True)
-        raise typer.Exit(2) from error
-
-    if not config.hosts:
-        typer.echo("no hosts configured")
-        return
-
-    for host_name, host in sorted(config.hosts.items()):
-        description = f" - {host.description}" if host.description else ""
-        typer.echo(f"{host_name}: {host.destination}{description}")
-
-
-@app.command("doctor")
-def doctor_command(context: typer.Context) -> None:
-    """Check local configuration and tools without network activity."""
-
-    cli_context: CliContext = context.obj
-    results = run_diagnostics(cli_context.config_path)
-    for result in results:
-        typer.echo(f"[{result.status}] {result.name}: {result.detail}")
-
-    if any(result.status == "error" for result in results):
-        raise typer.Exit(1)
 
 
 def _resolve_cli_shell_paths(

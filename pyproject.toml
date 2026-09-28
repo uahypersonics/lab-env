@@ -41,7 +41,7 @@ dev = [
 ]
 
 [project.scripts]
-lab = "lab_env.cli:app"
+lab = "lab_env.cli.app:app"
 
 [project.urls]
 Homepage = "https://github.com/uahypersonics/lab-env"

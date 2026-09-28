@@ -20,6 +20,9 @@ def test_help_and_version() -> None:
     assert "init" in help_result.output
     assert "hosts" in help_result.output
     assert "doctor" in help_result.output
+    assert "shell" in help_result.output
+    assert "Environment" in help_result.output
+    assert "Shell" in help_result.output
     assert version_result.exit_code == 0
     assert version_result.output.startswith("lab ")
 
