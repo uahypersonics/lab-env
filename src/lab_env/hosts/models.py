@@ -7,8 +7,9 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True, slots=True)
 class HostConfig:
-    """Connection metadata for one host destination."""
+    """Connection metadata for one remote host."""
 
     destination: str
     description: str | None = None
     ssh_command: str = "ssh"
+    transfer_destination: str | None = None

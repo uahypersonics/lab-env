@@ -25,14 +25,19 @@ The `[hosts]` table is for personal remote systems used by `connect`, `pull`, an
 without a local entry. Each `[hosts.NAME]` child table adds a host or overrides a
 built-in entry, and the name is used on the command line.
 
-The built-in `uahpc` destination is `hpc.arizona.edu`; SSH uses the current local
-username unless you specify `User` for that host in `~/.ssh/config`. For example,
-you can customize the built-in destination locally with:
+The built-in `uahpc` SSH destination is `hpc.arizona.edu`; file transfers use
+`filexfer.hpc.arizona.edu`. SSH uses the current local username unless you
+specify `User` for that host in `~/.ssh/config`. For a personal host that uses a
+different transfer endpoint, set `transfer_destination`:
 
 ```toml
 [hosts.uahpc]
 destination = "chader@hpc.arizona.edu"
+# transfer_destination = "filexfer.hpc.arizona.edu"
 ```
+
+When overriding a built-in host, unspecified built-in fields such as its
+transfer destination remain in effect.
 
 When a host requires a different SSH-compatible executable, configure its path
 explicitly. `connect`, `pull`, and `push` all use the same executable:

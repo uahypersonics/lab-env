@@ -28,21 +28,23 @@ lab hosts
 lab doctor
 ```
 
-`hosts` starts empty. `doctor` validates configuration, identifies Bash or Zsh,
-and locates `ssh`, `rsync`, `scp`, and `sftp`. It never connects to a remote
-system.
+`hosts` lists the shared `uahpc` destination and any hosts in your config.
+`doctor` validates configuration, identifies Bash or Zsh, checks Conda
+initialization, and locates `ssh`, `rsync`, `scp`, and `sftp`. It never connects
+to a remote system.
 
 ## 3. Connect and Transfer
 
-After adding a host in `config.toml`, preview commands without connecting:
+Preview commands without connecting:
 
 ```bash
-lab connect example --dry-run
-lab pull example results/ ./results/ --dry-run
-lab push example input/ work/input/ --dry-run
+lab connect uahpc --dry-run
+lab pull uahpc results/ ./results/ --dry-run
+lab push uahpc input/ work/input/ --dry-run
 ```
 
-Remove `--dry-run` to execute them. Transfer paths preserve rsync's trailing
+Add personal destinations under `[hosts.NAME]` in `config.toml` as needed.
+Remove `--dry-run` to execute the commands. Transfer paths preserve rsync's trailing
 slash behavior: `results/` copies the directory contents, while `results` copies
 the directory itself.
 

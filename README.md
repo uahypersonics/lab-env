@@ -11,20 +11,10 @@ environments on macOS and Linux. It keeps personal host configuration outside
 the installed package and provides diagnostics without connecting to remote
 systems or changing shell startup files.
 
-## Status
-
-The initial foundation implements:
-
-- `lab init` to create personal TOML configuration safely;
-- `lab hosts` to inspect configured SSH aliases;
-- `lab doctor` to validate configuration, shell support, and local clients;
-- `lab connect` to open SSH or run a remote command;
-- `lab pull` and `lab push` for resumable rsync transfers;
-- `lab shell preview/install/status/uninstall` for managed Bash or Zsh aliases and startup integration;
-- an explicit global `--config` option for isolated or alternate setups.
-
-Navigation shortcuts, optional shell features, and study orchestration are
-planned but are not implemented yet.
+`lab-env` provides personal TOML configuration, shared and user-defined hosts,
+SSH and resumable rsync commands, local diagnostics, and managed Bash/Zsh shell
+integration. Shell setup preserves existing dotfiles and can be previewed before
+installation.
 
 ## Installation
 

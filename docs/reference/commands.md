@@ -12,8 +12,8 @@ preserved and produce a nonzero exit code. No dotfiles are modified.
 
 ## `lab hosts`
 
-Validates configuration and lists host names, SSH destinations, and optional
-descriptions. It does not connect to a host.
+Validates configuration and lists built-in and user-configured host names, SSH
+destinations, and optional descriptions. It does not connect to a host.
 
 ## `lab doctor`
 
@@ -24,7 +24,7 @@ and `sftp` on `PATH`. Missing clients or an enabled Conda integration without
 
 ## `lab connect HOST [REMOTE_ARGS]...`
 
-Opens SSH to a configured host. Additional arguments run a remote command. Use
+Opens SSH to a built-in or user-configured host. Additional arguments run a remote command. Use
 `--dry-run` to print the safely quoted command without starting a process. Use
 `--` before remote arguments that begin with a hyphen.
 
@@ -32,13 +32,15 @@ Opens SSH to a configured host. Additional arguments run a remote command. Use
 
 Pulls files with resumable rsync. The local path defaults to the current
 directory. Archive mode, compression, partial files, append verification, and an
-aggregate progress display are enabled. Use `--dry-run` to preview the command.
+aggregate progress display are enabled. Transfers use `transfer_destination` if
+configured, otherwise the host's SSH destination. Use `--dry-run` to preview the
+command.
 
 ## `lab push HOST LOCAL_PATH REMOTE_PATH`
 
-Pushes files with the same resumable rsync settings as `pull`. Local `~` paths
-are expanded without changing trailing-slash semantics. Use `--dry-run` to
-preview the command.
+Pushes files with the same resumable rsync settings and destination selection as
+`pull`. Local `~` paths are expanded without changing trailing-slash semantics.
+Use `--dry-run` to preview the command.
 
 ## `lab shell preview`
 

@@ -14,11 +14,14 @@ def available_hosts(configured_hosts: Mapping[str, HostConfig]) -> dict[str, Hos
     hosts = dict(DEFAULT_HOSTS)
     for host_name, configured_host in configured_hosts.items():
         default_host = hosts.get(host_name)
-        if default_host is not None and configured_host.description is None:
+        if default_host is not None:
             configured_host = HostConfig(
                 destination=configured_host.destination,
-                description=default_host.description,
+                description=configured_host.description or default_host.description,
                 ssh_command=configured_host.ssh_command,
+                transfer_destination=(
+                    configured_host.transfer_destination or default_host.transfer_destination
+                ),
             )
         hosts[host_name] = configured_host
     return hosts

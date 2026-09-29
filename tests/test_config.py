@@ -75,6 +75,7 @@ def test_builtin_hosts_are_available_without_user_entries(tmp_path: Path) -> Non
     assert config.hosts == {}
     hosts = available_hosts(config.hosts)
     assert hosts["uahpc"].destination == "hpc.arizona.edu"
+    assert hosts["uahpc"].transfer_destination == "filexfer.hpc.arizona.edu"
     assert hosts["uahpc"].description == "University of Arizona HPC"
 
 
@@ -90,6 +91,7 @@ def test_user_host_entry_overrides_builtin_host(tmp_path: Path) -> None:
     assert config.hosts["uahpc"].destination == "chader@hpc.arizona.edu"
     hosts = available_hosts(config.hosts)
     assert hosts["uahpc"].destination == "chader@hpc.arizona.edu"
+    assert hosts["uahpc"].transfer_destination == "filexfer.hpc.arizona.edu"
     assert hosts["uahpc"].description == "University of Arizona HPC"
 
 

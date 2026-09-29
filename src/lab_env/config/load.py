@@ -16,7 +16,7 @@ from lab_env.config.classes import (
 from lab_env.hosts.models import HostConfig
 
 _TOP_LEVEL_FIELDS = {"schema_version", "hosts", "shell"}
-_HOST_FIELDS = {"destination", "description", "ssh_command"}
+_HOST_FIELDS = {"destination", "description", "ssh_command", "transfer_destination"}
 _SHELL_FIELDS = {
     "aliases",
     "conda_init_path",
@@ -96,10 +96,19 @@ def _parse_config(raw_config: dict[str, Any]) -> LabConfig:
         if not isinstance(ssh_command, str) or not ssh_command.strip():
             raise ConfigError(f"hosts.{host_name}.ssh_command must be a non-empty string")
 
+        transfer_destination = raw_host.get("transfer_destination")
+        if transfer_destination is not None and (
+            not isinstance(transfer_destination, str) or not transfer_destination.strip()
+        ):
+            raise ConfigError(f"hosts.{host_name}.transfer_destination must be a non-empty string")
+
         hosts[host_name] = HostConfig(
             destination=destination.strip(),
             description=description,
             ssh_command=ssh_command.strip(),
+            transfer_destination=(
+                transfer_destination.strip() if transfer_destination is not None else None
+            ),
         )
 
     shell = _parse_shell(raw_config.get("shell", {}))

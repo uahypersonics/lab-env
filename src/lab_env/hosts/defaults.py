@@ -6,5 +6,6 @@ DEFAULT_HOSTS = {
     "uahpc": HostConfig(
         destination="hpc.arizona.edu",
         description="University of Arizona HPC",
+        transfer_destination="filexfer.hpc.arizona.edu",
     ),
 }

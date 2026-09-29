@@ -9,6 +9,7 @@ from unittest.mock import patch
 from typer.testing import CliRunner
 
 from lab_env.cli import app
+from lab_env.hosts.catalog import available_hosts
 from lab_env.hosts.models import HostConfig
 from lab_env.remote import build_connect_command, build_transfer_command
 
@@ -38,6 +39,22 @@ def test_build_transfer_commands_are_resumable() -> None:
     assert "--append-verify" in pull_command
     assert pull_command[-2:] == ["cluster-alias:results/run 1/", expanduser("~/data")]
     assert push_command[-2:] == [expanduser("~/input"), "cluster-alias:/scratch/run 1/"]
+
+
+def test_uahpc_file_transfers_use_filexfer_host() -> None:
+    host = available_hosts({})["uahpc"]
+
+    pull_command = build_transfer_command("pull", host, "/project/results/", "./results/")
+    push_command = build_transfer_command("push", host, "./input/", "/project/input/")
+
+    assert pull_command[-2:] == [
+        "filexfer.hpc.arizona.edu:/project/results/",
+        "./results/",
+    ]
+    assert push_command[-2:] == [
+        "./input/",
+        "filexfer.hpc.arizona.edu:/project/input/",
+    ]
 
 
 def test_remote_cli_dry_run_uses_configured_host(tmp_path: Path) -> None:

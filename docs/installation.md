@@ -8,11 +8,7 @@
 
 ## From PyPI
 
-!!! note "First release"
-	Tagged releases are published automatically. Until the first successful
-	publication appears on PyPI, use the source installation below.
-
-Install a published release with:
+Install the latest published release with pip:
 
 ```bash
 pip install lab-env

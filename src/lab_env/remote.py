@@ -72,7 +72,8 @@ def build_transfer_command(
         Argument list suitable for ``subprocess.run``.
     """
 
-    remote_prefix = f"{host.destination}:"
+    transfer_destination_host = host.transfer_destination or host.destination
+    remote_prefix = f"{transfer_destination_host}:"
     if direction == "pull":
         transfer_source = f"{remote_prefix}{source}"
         transfer_destination = expanduser(destination)

@@ -26,4 +26,7 @@ def cmd_hosts(context: typer.Context) -> None:
 
     for host_name, host in sorted(hosts.items()):
         description = f" - {host.description}" if host.description else ""
-        typer.echo(f"{host_name}: {host.destination}{description}")
+        transfer_note = ""
+        if host.transfer_destination and host.transfer_destination != host.destination:
+            transfer_note = f" (file transfers: {host.transfer_destination})"
+        typer.echo(f"{host_name}: {host.destination}{description}{transfer_note}")
