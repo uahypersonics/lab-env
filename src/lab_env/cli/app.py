@@ -16,6 +16,7 @@ from lab_env.cli.cmd_hosts import cmd_hosts
 from lab_env.cli.cmd_init import cmd_init
 from lab_env.cli.cmd_remote import cmd_connect, cmd_pull, cmd_push
 from lab_env.cli.cmd_shell import shell_app
+from lab_env.cli.cmd_tecplot import tecplot_app
 from lab_env.cli.context import CliContext
 from lab_env.config import default_config_path
 
@@ -82,6 +83,9 @@ app.command(name="push", rich_help_panel="Remote")(cmd_push)
 
 # shell command
 app.add_typer(shell_app, name="shell", rich_help_panel="Shell")
+
+# Tecplot command
+app.add_typer(tecplot_app, name="tecplot", rich_help_panel="Applications")
 
 # --------------------------------------------------
 # main entry point

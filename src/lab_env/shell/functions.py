@@ -36,6 +36,15 @@ def render_qs() -> str:
     return fcn_lines
 
 
+def render_lay2pic() -> str:
+    """Render the legacy-compatible Tecplot export shortcut."""
+
+    fcn_lines = """lay2pic() {
+    lab tecplot export "$@"
+}"""
+    return fcn_lines
+
+
 # --------------------------------------------------
 # compose generated functions
 # --------------------------------------------------
@@ -48,5 +57,6 @@ def render_functions() -> str:
         "# --------------------------------------------------",
         render_findbig(),
         render_qs(),
+        render_lay2pic(),
     ]
     return "\n".join(lines) + "\n"

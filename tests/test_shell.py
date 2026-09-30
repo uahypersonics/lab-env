@@ -80,6 +80,7 @@ def test_generated_shell_includes_default_aliases(tmp_path: Path) -> None:
     assert "alias rm='rm -i'" in generated_shell
     assert 'local size="${1:-100M}"' in generated_shell
     assert 'find . -type f -size "+${size}" -exec du -h {} +' in generated_shell
+    assert 'lay2pic() {\n    lab tecplot export "$@"\n}' in generated_shell
     function_section = (
         "# --------------------------------------------------\n"
         "# functions managed by lab-env\n"
@@ -164,6 +165,40 @@ def test_qs_uses_slurm_or_pbs_command_available_on_path(tmp_path: Path) -> None:
 
     assert slurm_result.stdout.strip() == "squeue:-u test-user --start"
     assert pbs_result.stdout.strip() == "qstat:-u test-user --start"
+
+
+def test_lay2pic_delegates_to_lab_tecplot_export(tmp_path: Path) -> None:
+    """The legacy shortcut must delegate all behavior to the Python command."""
+
+    config_path = tmp_path / "config.toml"
+    config_path.write_text("schema_version = 1\n[hosts]\n", encoding="utf-8")
+    generated_path = tmp_path / "generated.sh"
+    generated_path.write_text(render_generated_shell(config_path), encoding="utf-8")
+    command_bin = tmp_path / "bin"
+    command_bin.mkdir()
+    lab_path = command_bin / "lab"
+    lab_path.write_text('#!/bin/sh\nprintf "%s\\n" "$@"\n', encoding="utf-8")
+    lab_path.chmod(0o755)
+
+    result = subprocess.run(
+        [
+            _test_shell_executable(),
+            "-c",
+            f'source "{generated_path}"; lay2pic figure.lay --width 1200',
+        ],
+        check=True,
+        capture_output=True,
+        env={**os.environ, "PATH": f"{command_bin}:/usr/bin:/bin"},
+        text=True,
+    )
+
+    assert result.stdout.splitlines() == [
+        "tecplot",
+        "export",
+        "figure.lay",
+        "--width",
+        "1200",
+    ]
 
 
 def test_generated_shell_initializes_miniforge_from_home(tmp_path: Path) -> None:

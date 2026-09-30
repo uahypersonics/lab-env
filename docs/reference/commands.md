@@ -42,6 +42,22 @@ Pushes files with the same resumable rsync settings and destination selection as
 `pull`. Local `~` paths are expanded without changing trailing-slash semantics.
 Use `--dry-run` to preview the command.
 
+## `lab tecplot export LAYOUT...`
+
+Exports one or more Tecplot `.lay` or `.lpk` files through Tecplot's batch
+interface. The default output is PNG with a width of 2000 pixels. Use
+`--format`, `--width`, and `--output-dir` to override those defaults. Tecplot is
+located from `--tecplot`, `TECPLOT_EXE`, `tec360` on `PATH`, or a standard
+macOS application path, in that order.
+
+The managed Bash/Zsh function `lay2pic` delegates to this command, so the
+common case remains:
+
+```bash
+lay2pic figure.lay
+lay2pic first.lay second.lay --width 3000
+```
+
 ## `lab shell preview`
 
 Prints the detected shell, startup paths, generated aliases and static state, and

@@ -24,12 +24,34 @@ def test_help_and_version() -> None:
     assert "pull" in help_result.output
     assert "push" in help_result.output
     assert "shell" in help_result.output
+    assert "tecplot" in help_result.output
     assert "Configuration" in help_result.output
     assert "Diagnostics" in help_result.output
     assert "Remote" in help_result.output
     assert "Shell" in help_result.output
     assert version_result.exit_code == 0
     assert version_result.output.startswith("lab ")
+
+
+@patch("lab_env.cli.cmd_tecplot.export_layouts")
+def test_tecplot_export_uses_png_and_width_2000_by_default(
+    mock_export_layouts, tmp_path: Path
+) -> None:
+    layout_path = tmp_path / "figure.lay"
+    output_path = tmp_path / "figure.png"
+    mock_export_layouts.return_value = [output_path]
+
+    result = runner.invoke(app, ["tecplot", "export", str(layout_path)])
+
+    assert result.exit_code == 0
+    mock_export_layouts.assert_called_once_with(
+        [layout_path],
+        output_format="png",
+        width=2000,
+        output_dir=None,
+        tecplot_executable=None,
+    )
+    assert str(output_path) in result.output
 
 
 def test_init_creates_config_without_overwriting(tmp_path: Path) -> None:

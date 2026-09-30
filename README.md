@@ -41,9 +41,17 @@ lab doctor
 lab connect HOST
 lab pull HOST REMOTE_PATH [LOCAL_PATH]
 lab push HOST LOCAL_PATH REMOTE_PATH
+lab tecplot export figure.lay
 lab shell preview
 lab shell install
 lab shell status
+```
+
+After `lab shell install`, the legacy-compatible shortcut exports PNG images at
+2000 pixels wide by default:
+
+```bash
+lay2pic figure.lay
 ```
 
 By default, configuration is stored at
