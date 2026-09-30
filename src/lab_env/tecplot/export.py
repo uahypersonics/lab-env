@@ -60,8 +60,7 @@ def find_tecplot_executable(explicit_path: Path | None = None) -> Path:
             return candidate.resolve()
 
     raise FileNotFoundError(
-        "Tecplot executable not found; use --tecplot, set TECPLOT_EXE, "
-        "or add tec360 to PATH"
+        "Tecplot executable not found; use --tecplot, set TECPLOT_EXE, or add tec360 to PATH"
     )
 
 
