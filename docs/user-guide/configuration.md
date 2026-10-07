@@ -89,6 +89,13 @@ deliberately override a built-in alias. Alias names may contain letters, numbers
 interpreted by the active shell, so treat the personal configuration as executable
 user input and do not copy untrusted commands into it.
 
+## Standard User Executables
+
+The generated Bash or Zsh fragment prepends `$HOME/bin` to `PATH` once. This
+makes user-installed command-line tools under `~/bin` discoverable without
+requiring a separate dotfile edit. The standard path setup remains enabled when
+Conda initialization is disabled.
+
 ## Managed Functions
 
 Built-in functions are maintained separately from aliases in

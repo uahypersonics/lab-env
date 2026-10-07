@@ -83,9 +83,22 @@ def find_conda_init(
 def render_environment(config: ShellConfig) -> str:
     """Render enabled shell environment integrations."""
 
-    if not config.initialize_conda:
-        return ""
+    # prepend the standard user executable directory once
+    environment_lines = [
+        "# --------------------------------------------------",
+        "# environment: initializes optional command-line tools",
+        "# --------------------------------------------------",
+        'case ":${PATH:-}:" in',
+        '    *":$HOME/bin:"*) ;;',
+        '    *) export PATH="$HOME/bin${PATH:+:$PATH}" ;;',
+        "esac",
+    ]
 
+    # stop after the standard PATH setup when Conda integration is disabled
+    if not config.initialize_conda:
+        return "\n".join(environment_lines) + "\n"
+
+    # find available Conda initialization scripts
     discovered_path = find_conda_init(config.conda_init_path)
     if config.conda_init_path is not None:
         conda_paths = [
@@ -99,12 +112,7 @@ def render_environment(config: ShellConfig) -> str:
         conda_paths.extend(str(root / CONDA_PROFILE_PATH) for root in SYSTEM_CONDA_ROOTS)
         conda_paths = list(dict.fromkeys(conda_paths))
 
-    environment_lines = [
-        "# --------------------------------------------------",
-        "# environment: initializes optional command-line tools",
-        "# --------------------------------------------------",
-        "for _lab_env_conda_sh in \\",
-    ]
+    environment_lines.extend(["", "for _lab_env_conda_sh in \\"])
     for index, conda_path in enumerate(conda_paths):
         continuation = " \\" if index < len(conda_paths) - 1 else ""
         environment_lines.append(f"    {conda_path}{continuation}")
