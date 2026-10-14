@@ -23,6 +23,7 @@ DEFAULT_ALIASES = {
     "mv": "mv -i",
     "rm": "rm -i",
     "edit": "emacs -nw",
+    "clean": "rm -f -- *~",
 }
 
 
